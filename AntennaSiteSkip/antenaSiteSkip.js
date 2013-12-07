@@ -3,12 +3,12 @@
 // @namespace   https://twitter.com/akameco
 // @description いいぜアンテナサイトに飛ぶってならまずはそのふざけた幻想をぶち殺す
 // @include     http://2ch-c.net/*
+// @include     http://newser.cc/*
+// @include     http://get2ch.net/*
+// @include     http://the-3rd.net/*
 // @include     http://matomeantena.com/*
 // @include     http://moudamepo.com/*
 // @include     http://newmofu.doorblog.jp/*
-// @include     http://newser.cc/*
-// @include     http://the-3rd.net/*
-// @include     http://get2ch.net/*
 // @include     http://blog-news.doorblog.jp/*
 // @include     http://nullpoantenna.com/*
 // @include     http://newpuru.doorblog.jp/*
@@ -30,7 +30,6 @@
 // ワロタあんてな
 // だめぽアンテナ
 // にゅーもふ
-// ワロタあんてな
 // ぶろにゅー
 // ヌルポあんてな
 // にゅーぷる
