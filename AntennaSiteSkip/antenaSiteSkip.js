@@ -44,7 +44,7 @@
 
   function doOpen() {
     let host = location.host;
-    matchHost[host];
+    matchHost[host]();
   }
 
   window.onload = function () {
@@ -200,5 +200,5 @@
     "katuru.com": function () {
       skipClass('.rss_center_div a');
     }
-  }
+  };
 })();
