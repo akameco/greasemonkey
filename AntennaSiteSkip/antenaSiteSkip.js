@@ -41,6 +41,7 @@
 // 勝つるあんてな！
 
 (function (){
+
   function doOpen() {
     let host = location.host;
     switch(host){
@@ -114,27 +115,50 @@
     // てゆーかこの繰り返し意味あるかわからん
   }
 
+
+  
+
+  // targetを取得 
+  function getTarget(path) {
+    return document.querySelectorAll(path)[0];
+  }
+
+  // targetsを取得 
+  function getTargets(path) {
+    return document.querySelectorAll(path);
+  }
+
+  // window.openは_self固定 
+  function wopen(target) {
+    window.open(target,'_self').focus();
+  }
+
+  // リンクがclassで指定されているサイト
+  function skipClass(select) {
+    let target = getTarget(select).getAttribute('href');
+    wopen(target);
+  }
+
   // しぃアンテナ(*ﾟーﾟ)
   // http://2ch-c.net/*
   function skip2chcnet() {
     let target = document.getElementById('pickup').getAttribute('href');
-    window.open(target,'_self').focus(); 
+    wopen(target);
   }
 
   // 2GET
   //http://get2ch.net/*
   function skipGet2ch() {
-    let target = document.querySelectorAll('.pickup a')[0].getAttribute('href');
-    window.open(target,'_self').focus(); 
+    skipClass('.pickup a');
   }
 
   // News人
   // http://newser.cc/*
   function skipNewser() {
-    let target = document.querySelectorAll('td.news-link a');
-    for (let i=0; i < target.length; i++) {
-      if(target[i].getAttribute('style') != null){
-        window.open(target[i],'_self').focus();
+    let targets = getTargets('td.news-link a');
+    for (let i=0; i < targets.length; i++) {
+      if(targets[i].getAttribute('style') != null){
+        wopen(targets[i]);
       }
     }
   }
@@ -142,10 +166,10 @@
   // The 3rd
   // http://the-3rd.net/*
   function skipthe3rd() {
-    let target = document.querySelectorAll('div#content.wrap div#l_col a');
-    for (let i=0; i < target.length; i++) {
-      if(target[i].childNodes[1].childNodes[3].getAttribute('style') != null) {
-        window.open(target[i],'_self').focus();
+    let targets = getTargets('div#content.wrap div#l_col a');
+    for (let i=0; i < targets.length; i++) {
+      if(targets[i].childNodes[1].childNodes[3].getAttribute('style') != null) {
+        wopen(targets[i]);
       }
     }
   }
@@ -153,81 +177,74 @@
   // ワロタあんてな
   // http://matomeantena.com/*
   function skipMatomeantena() {
-    let target = document.querySelectorAll('.rss_link > a')[0].getAttribute('href');
-    window.open(target,"_self").focus();
+    skipClass('.rss_link > a');
   }
 
   // にゅーもふ
   // http://newmofu.doorblog.jp/*
   function skipNewmofu() {
-    let target = document.querySelectorAll('.title_link a')[0].getAttribute('href');
-    window.open(target,'_self').focus();
+    skipClass('.title_link a');
   }
 
   // だめぽアンテナ
   // http://moudamepo.com/*
   function skipMoudamepo() {
-    let target = document.querySelectorAll('.headline_pkup a')[0].getAttribute("href");
-    window.open(target,"_self").focus();
+    skipClass('.headline_pkup a');
   }
 
   // ぶろにゅー
   // http://blog-news.doorblog.jp/
   function skipBlognews() {
-    let target = document.querySelectorAll('.title_link')[0].getAttribute('href');
-    window.open(target,'_self').focus();
+    skipClass('.title_link');
   }
 
   //ぬるぽあんてな
   //http://nullpoantenna.com/*
   function skipNullpoantenna() {
-    let target = document.querySelectorAll('.rss_link')[0].firstChild.getAttribute('href');
-    window.open(target,'_self').focus();
+    let target = getTarget('.rss_link').firstChild.getAttribute('href');
+    wopen(target);
   }
 
   // にゅーぷる
   //http://newpuru.doorblog.jp/*
   function skipNewpuru() {
-    let target = document.querySelectorAll('.titleLink')[0].getAttribute('href');
-    window.open(target,'_self').focus();
+    skipClass('.titleLink');
   }
 
   // best trend news
   // http://besttrendnews.net/*
   function skipBesttrendnews() {
-    let target = document.querySelectorAll('.select')[0].firstChild.getAttribute('href');
-    window.open(target,'_self').focus();
+    let target = getTarget('.select').firstChild.getAttribute('href');
+    wopen(target);
   }
 
   // スオミネイト
   // http://suomi-neito.com/*
   function skipSuomi() {
-    let target = document.querySelectorAll('.pickup')[0].firstChild.innerHTML;
-    window.open(target,'_self').focus();
+    let target = getTarget('.pickup').firstChild.innerHTML;
+    wopen(target);
   }
 
   // LogPo!2ch
   // http://2ch.logpo.jp/*
   function skipLogPo() {
-    let target = document.querySelectorAll('.caption a')[0].getAttribute('href');
-    window.open(target,'_self').focus();
+    skipClass('.caption a');
   }
   
   // アナグロあんてな
   // http://anaguro.yanen.org/*
   function skipAnaguro() {
-    let target = document.querySelectorAll('.title a')[0].getAttribute('href');
-    window.open(target,'_self').focus();
+    skipClass('.title a');
   }
 
   // アンテナ速報
   // http://a.anipo.jp/*
   function skipAanipo() {
-    let target = document.querySelectorAll('#tbody tr');
-    for (let i=0; i < target.length; i++) {
-      if(target[i].getAttribute('style') != null){
-        let link = target[i].querySelectorAll('a')[0].getAttribute('href');
-        window.open(link,'_self').focus();
+    let targets = getTargets('#tbody tr');
+    for (let i=0; i < targets.length; i++) {
+      if(targets[i].getAttribute('style') != null){
+        let target = targets[i].querySelectorAll('a')[0].getAttribute('href');
+        wopen(target);
       }
     }
   }
@@ -235,8 +252,7 @@
   // 勝つるあんてな
   // http://katuru.com/*
   function skipKaturu() {
-    let target = document.querySelectorAll('.rss_center_div a')[0].getAttribute('href');
-    window.open(target,'_self').focus();
+    skipClass('.rss_center_div a');
   }
 
 })();
