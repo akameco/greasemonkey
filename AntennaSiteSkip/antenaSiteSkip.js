@@ -48,19 +48,15 @@
   }
 
   window.onload = function () {
-    // 行くでw
     setTimeout(function() {
       doOpen(); 
     }, 100);
-    // もーいっかい！
     setTimeout(function() { 
       doOpen(); 
     }, 500);
-    // 今度こそ！
     setTimeout(function() {
       doOpen(); 
     }, 1000);
-    // てゆーかこの繰り返し意味あるかわからん
   }
 
   // targetを取得 
