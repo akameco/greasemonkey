@@ -44,59 +44,7 @@
 
   function doOpen() {
     let host = location.host;
-    switch(host){
-      case "2ch-c.net":             
-        skip2chcnet();       
-        break;
-      case "newser.cc":             
-        skipNewser();        
-        break;
-      case  "get2ch.net":           
-        skipGet2ch();        
-        break;
-      case "the-3rd.net":           
-        skipthe3rd();        
-        break;
-      case "matomeantena.com":      
-        skipMatomeantena();  
-        break;
-      case "moudamepo.com":         
-        skipMoudamepo();     
-        break;
-      case "newmofu.doorblog.jp":   
-        skipNewmofu();       
-        break;
-      case "blog-news.doorblog.jp": 
-        skipBlognews();      
-        break;
-      case "nullpoantenna.com":     
-        skipNullpoantenna(); 
-        break;
-      case "newpuru.doorblog.jp":   
-        skipNewpuru();
-        break;    
-      case "besttrendnews.net":     
-        skipBesttrendnews(); 
-        break;
-      case "suomi-neito.com":       
-        skipSuomi();         
-        break;
-      case "2ch.logpo.jp":          
-        skipLogPo();         
-        break;
-      case "anaguro.yanen.org":     
-        skipAnaguro();       
-        break;
-      case "a.anipo.jp":            
-        skipAanipo();        
-        break;
-      case "katuru.com":            
-        skipKaturu();        
-        break;
-      default:
-        console.log("not match");
-        break;
-    }
+    matchHost[host];
   }
 
   window.onload = function () {
@@ -114,9 +62,6 @@
     }, 1000);
     // てゆーかこの繰り返し意味あるかわからん
   }
-
-
-  
 
   // targetを取得 
   function getTarget(path) {
@@ -139,120 +84,121 @@
     wopen(target);
   }
 
-  // しぃアンテナ(*ﾟーﾟ)
-  // http://2ch-c.net/*
-  function skip2chcnet() {
-    let target = document.getElementById('pickup').getAttribute('href');
-    wopen(target);
-  }
+  var matchHost = {
+    // しぃアンテナ(*ﾟーﾟ)
+    // http://2ch-c.net/*
+    "2ch-c.net": function () {
+      let target = document.getElementById('pickup').getAttribute('href');
+      wopen(target);
+    },
 
-  // 2GET
-  //http://get2ch.net/*
-  function skipGet2ch() {
-    skipClass('.pickup a');
-  }
+    // 2GET
+    //http://get2ch.net/*
+    "get2ch.net": function() {
+      skipClass('.pickup a');
+    },
 
-  // News人
-  // http://newser.cc/*
-  function skipNewser() {
-    let targets = getTargets('td.news-link a');
-    for (let i=0; i < targets.length; i++) {
-      if(targets[i].getAttribute('style') != null){
-        wopen(targets[i]);
+    // News人
+    // http://newser.cc/*
+    "newser.cc": function() {
+      let targets = getTargets('td.news-link a');
+      for (let i=0; i < targets.length; i++) {
+        if(targets[i].getAttribute('style') != null){
+          wopen(targets[i]);
+        }
       }
+    },
+
+    // The 3rd
+    // http://the-3rd.net/*
+    "the-3rd.net": function() {
+      let targets = getTargets('div#content.wrap div#l_col a');
+      for (let i=0; i < targets.length; i++) {
+        if(targets[i].childNodes[1].childNodes[3].getAttribute('style') != null) {
+          wopen(targets[i]);
+        }
+      }
+    },
+
+    // ワロタあんてな
+    // http://matomeantena.com/*
+    "matomeantena.com": function () {
+      skipClass('.rss_link > a');
+    },
+
+    // にゅーもふ
+    // http://newmofu.doorblog.jp/*
+    "newmofu.doorblog.jp": function () {
+      skipClass('.title_link a');
+    },
+
+    // だめぽアンテナ
+    // http://moudamepo.com/*
+    "moudamepo.com": function () {
+      skipClass('.headline_pkup a');
+    },
+
+    // ぶろにゅー
+    // http://blog-news.doorblog.jp/
+    "blog-news.doorblog.jp": function () {
+      skipClass('.title_link');
+    },
+
+    //ぬるぽあんてな
+    //http://nullpoantenna.com/*
+    "nullpoantenna.com": function () {
+      let target = getTarget('.rss_link').firstChild.getAttribute('href');
+      wopen(target);
+    },
+
+    // にゅーぷる
+    //http://newpuru.doorblog.jp/*
+    "newpuru.doorblog.jp": function () {
+      skipClass('.titleLink');
+    },
+
+    // best trend news
+    // http://besttrendnews.net/*
+    "besttrendnews.net": function () {
+      let target = getTarget('.select').firstChild.getAttribute('href');
+      wopen(target);
+    },
+
+    // スオミネイト
+    // http://suomi-neito.com/*
+    "suomi-neito.com": function () {
+      let target = getTarget('.pickup').firstChild.innerHTML;
+      wopen(target);
+    },
+
+    // LogPo!2ch
+    // http://2ch.logpo.jp/*
+    "2ch.logpo.jp": function () {
+      skipClass('.caption a');
+    },
+
+    // アナグロあんてな
+    // http://anaguro.yanen.org/*
+    "anaguro.yanen.org": function () {
+      skipClass('.title a');
+    },
+
+    // アンテナ速報
+    // http://a.anipo.jp/*
+    "a.anipo.jp": function () {
+      let targets = getTargets('#tbody tr');
+      for (let i=0; i < targets.length; i++) {
+        if(targets[i].getAttribute('style') != null){
+          let target = targets[i].querySelectorAll('a')[0].getAttribute('href');
+          wopen(target);
+        }
+      }
+    },
+
+    // 勝つるあんてな
+    // http://katuru.com/*
+    "katuru.com": function () {
+      skipClass('.rss_center_div a');
     }
   }
-
-  // The 3rd
-  // http://the-3rd.net/*
-  function skipthe3rd() {
-    let targets = getTargets('div#content.wrap div#l_col a');
-    for (let i=0; i < targets.length; i++) {
-      if(targets[i].childNodes[1].childNodes[3].getAttribute('style') != null) {
-        wopen(targets[i]);
-      }
-    }
-  }
-
-  // ワロタあんてな
-  // http://matomeantena.com/*
-  function skipMatomeantena() {
-    skipClass('.rss_link > a');
-  }
-
-  // にゅーもふ
-  // http://newmofu.doorblog.jp/*
-  function skipNewmofu() {
-    skipClass('.title_link a');
-  }
-
-  // だめぽアンテナ
-  // http://moudamepo.com/*
-  function skipMoudamepo() {
-    skipClass('.headline_pkup a');
-  }
-
-  // ぶろにゅー
-  // http://blog-news.doorblog.jp/
-  function skipBlognews() {
-    skipClass('.title_link');
-  }
-
-  //ぬるぽあんてな
-  //http://nullpoantenna.com/*
-  function skipNullpoantenna() {
-    let target = getTarget('.rss_link').firstChild.getAttribute('href');
-    wopen(target);
-  }
-
-  // にゅーぷる
-  //http://newpuru.doorblog.jp/*
-  function skipNewpuru() {
-    skipClass('.titleLink');
-  }
-
-  // best trend news
-  // http://besttrendnews.net/*
-  function skipBesttrendnews() {
-    let target = getTarget('.select').firstChild.getAttribute('href');
-    wopen(target);
-  }
-
-  // スオミネイト
-  // http://suomi-neito.com/*
-  function skipSuomi() {
-    let target = getTarget('.pickup').firstChild.innerHTML;
-    wopen(target);
-  }
-
-  // LogPo!2ch
-  // http://2ch.logpo.jp/*
-  function skipLogPo() {
-    skipClass('.caption a');
-  }
-  
-  // アナグロあんてな
-  // http://anaguro.yanen.org/*
-  function skipAnaguro() {
-    skipClass('.title a');
-  }
-
-  // アンテナ速報
-  // http://a.anipo.jp/*
-  function skipAanipo() {
-    let targets = getTargets('#tbody tr');
-    for (let i=0; i < targets.length; i++) {
-      if(targets[i].getAttribute('style') != null){
-        let target = targets[i].querySelectorAll('a')[0].getAttribute('href');
-        wopen(target);
-      }
-    }
-  }
-
-  // 勝つるあんてな
-  // http://katuru.com/*
-  function skipKaturu() {
-    skipClass('.rss_center_div a');
-  }
-
 })();
