@@ -45,53 +45,53 @@
   function doOpen() {
     let host = location.host;
     switch(host){
-      case "2ch-c.net":
-        skip2chcnet();
+      case "2ch-c.net":             
+        skip2chcnet();       
         break;
-      case "newser.cc":
-        skipNewser();
+      case "newser.cc":             
+        skipNewser();        
         break;
-      case  "get2ch.net":
-        skipGet2ch();
+      case  "get2ch.net":           
+        skipGet2ch();        
         break;
-      case "the-3rd.net":
-        skipthe3rd();
+      case "the-3rd.net":           
+        skipthe3rd();        
         break;
-      case "matomeantena.com":
-        skipMatomeantena();
+      case "matomeantena.com":      
+        skipMatomeantena();  
         break;
-      case "moudamepo.com":
-        skipMoudamepo();
+      case "moudamepo.com":         
+        skipMoudamepo();     
         break;
-      case "newmofu.doorblog.jp":
-        skipNewmofu();
+      case "newmofu.doorblog.jp":   
+        skipNewmofu();       
         break;
-      case "blog-news.doorblog.jp":
-        skipBlognews();
+      case "blog-news.doorblog.jp": 
+        skipBlognews();      
         break;
-      case "nullpoantenna.com":
-        skipNullpoantenna();
+      case "nullpoantenna.com":     
+        skipNullpoantenna(); 
         break;
-      case "newpuru.doorblog.jp":
-        skipNewpuru()
+      case "newpuru.doorblog.jp":   
+        skipNewpuru();
+        break;    
+      case "besttrendnews.net":     
+        skipBesttrendnews(); 
         break;
-      case "besttrendnews.net":
-        skipBesttrendnews();
+      case "suomi-neito.com":       
+        skipSuomi();         
         break;
-      case "suomi-neito.com":
-        skipSuomi();
+      case "2ch.logpo.jp":          
+        skipLogPo();         
         break;
-      case "2ch.logpo.jp":
-        skipLogPo();
+      case "anaguro.yanen.org":     
+        skipAnaguro();       
         break;
-      case "anaguro.yanen.org":
-        skipAnaguro();
+      case "a.anipo.jp":            
+        skipAanipo();        
         break;
-      case "a.anipo.jp":
-        skipAanipo();
-        break;
-      case "katuru.com":
-        skipKaturu();
+      case "katuru.com":            
+        skipKaturu();        
         break;
       default:
         console.log("not match");
