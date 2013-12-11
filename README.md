@@ -1,4 +1,3 @@
 greasemonkey
 ============
-
-greasemonkey plugin
+* greasemonkey plugin

@@ -18,6 +18,7 @@
 // @include     http://anaguro.yanen.org/*
 // @include     http://a.anipo.jp/*
 // @include     http://katuru.com/*
+// @include     http://news-choice.net/*
 // @version     1
 // @grant       none
 // ==/UserScript==
@@ -140,15 +141,15 @@
       skipClass('.title_link');
     },
 
-    //ぬるぽあんてな
-    //http://nullpoantenna.com/*
+    // ぬるぽあんてな
+    // http://nullpoantenna.com/*
     "nullpoantenna.com": function () {
       let target = getTarget('.rss_link').firstChild.getAttribute('href');
       wopen(target);
     },
 
     // にゅーぷる
-    //http://newpuru.doorblog.jp/*
+    // http://newpuru.doorblog.jp/*
     "newpuru.doorblog.jp": function () {
       skipClass('.titleLink');
     },
@@ -195,6 +196,13 @@
     // http://katuru.com/*
     "katuru.com": function () {
       skipClass('.rss_center_div a');
+    },
+
+    //newschoice
+    //http://news-choice.net/*
+    "news-choice.net": function () {
+      skipClass('.pickuptitle a');
     }
   };
+
 })();
