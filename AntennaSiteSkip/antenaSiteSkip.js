@@ -40,7 +40,7 @@
 // アナグロあんてな
 // アンテナ速報
 // 勝つるあんてな！
-
+// newschoice
 (function (){
 
   function doOpen() {
@@ -51,13 +51,13 @@
   window.onload = function () {
     setTimeout(function() {
       doOpen(); 
-    }, 100);
-    setTimeout(function() { 
-      doOpen(); 
-    }, 500);
-    setTimeout(function() {
-      doOpen(); 
-    }, 1000);
+    }, 10);
+    //    setTimeout(function() { 
+    //      doOpen(); 
+    //    }, 500);
+    //    setTimeout(function() {
+    //      doOpen(); 
+    //    }, 1000);
   }
 
   // targetを取得 
