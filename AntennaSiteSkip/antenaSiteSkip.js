@@ -19,6 +19,7 @@
 // @include     http://a.anipo.jp/*
 // @include     http://katuru.com/*
 // @include     http://news-choice.net/*
+// @include     http://img.favsite.jp/*
 // @version     1
 // @grant       none
 // ==/UserScript==
@@ -41,6 +42,8 @@
 // アンテナ速報
 // 勝つるあんてな！
 // newschoice
+// ２次元と３次元の画像ブログまとめ
+
 (function (){
 
   function doOpen() {
@@ -52,12 +55,12 @@
     setTimeout(function() {
       doOpen(); 
     }, 10);
-    //    setTimeout(function() { 
-    //      doOpen(); 
-    //    }, 500);
-    //    setTimeout(function() {
-    //      doOpen(); 
-    //    }, 1000);
+    setTimeout(function() { 
+      doOpen(); 
+    }, 500);
+    setTimeout(function() {
+      doOpen(); 
+    }, 1000);
   }
 
   // targetを取得 
@@ -202,7 +205,13 @@
     //http://news-choice.net/*
     "news-choice.net": function () {
       skipClass('.pickuptitle a');
-    }
-  };
+    },
 
+    // ２次元と３次元の画像ブログまとめ
+    // http://img.favsite.jp/*
+    "img.favsite.jp": function () {
+      skipClass('.stp');
+    }
+
+  };
 })();
