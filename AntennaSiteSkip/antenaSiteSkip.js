@@ -54,7 +54,7 @@
   window.onload = function () {
     setTimeout(function() {
       doOpen(); 
-    }, 10);
+    }, 100);
     setTimeout(function() { 
       doOpen(); 
     }, 500);
