@@ -14,7 +14,7 @@
     if (!element.className.contains('u0Entry')) return;
     if (element.attributes.getNamedItem('data-title').value.toUpperCase().match(/^(PR:|AD:|\[PR\])/)) {
       element.click();
-      var inline = document.querySelectorAll('inlineFrame')[0];
+      var inline = document.querySelectorAll('.inlineFrame')[0];
       inline.parentNode.removeChild(inline);
     }     
   },false);
