@@ -16,6 +16,9 @@ function submit_form() {
     }
   }
   submit.click(); 
+  // リダイレクトがうざいので0.1秒経過後自動で閉じる
+  // TODO:formを操作するのではなくhttpリクエスト に対応させたい
+  setTimeout(function() { window.close(); }, 100);
 }
 window.onload = function () {
   setTimeout(function() {
