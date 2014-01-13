@@ -7,11 +7,18 @@
 // @grant       none
 // ==/UserScript==
 
-var submit;
-for(var input, i=0; input = document.getElementsByTagName("input")[i]; i++){
-  if(input.type == "submit"){
-    submit = input;
-    break;
+function submit_form() {
+  var submit;
+  for(var input, i=0; input = document.getElementsByTagName("input")[i]; i++){
+    if(input.type == "submit"){
+      submit = input;
+      break;
+    }
   }
+  submit.click(); 
 }
-submit.click();
+window.onload = function () {
+  setTimeout(function() {
+    submit_form()
+  }, 10);
+}
