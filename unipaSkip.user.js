@@ -9,6 +9,7 @@
 
 function loginUnipa() {
   var loginButton = null;
+  var pass=false;
   // forms has only 1  
   var form = document.forms[0];
   // set autocomplete ON
@@ -16,7 +17,14 @@ function loginUnipa() {
 
   // look for input type=image
   for (j=0; formElement=form.getElementsByTagName("input")[j]; ++j){
-    if (formElement.type == "image") {
+    if(formElement.type == "password" && formElement.value){
+      pass = true; 
+      break;
+    }
+  }
+
+  for (j=0; formElement=form.getElementsByTagName("input")[j]; ++j){
+    if (formElement.type == "image" && pass) {
       loginButton = formElement;
       break;
     }
