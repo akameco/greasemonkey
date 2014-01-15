@@ -3,7 +3,7 @@
 // @namespace   https://twitter.com/akameco
 // @description 自動ログイン
 // @include     https://portal.sa.dendai.ac.jp/up/faces/login/Com00505A.jsp
-// @version     1
+// @version     1.01
 // @grant       none
 // ==/UserScript==
 
@@ -22,7 +22,7 @@ function loginUnipa() {
   }
 
   // check password
-  for (j=0; formElement=form.getElementsByTagName("input")[j]; ++j){
+  for (let i=0; formElement=form.getElementsByTagName("input")[i]; ++i){
     if(formElement.type == "password" && formElement.value){
       pass = true; 
       break;
@@ -30,7 +30,7 @@ function loginUnipa() {
   }
 
   // look for input type=image
-  for (j=0; formElement=form.getElementsByTagName("input")[j]; ++j){
+  for (let i=0; formElement=form.getElementsByTagName("input")[i]; ++i){
     if (formElement.type == "image" && pass) {
       loginButton = formElement;
       break;
