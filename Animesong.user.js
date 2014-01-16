@@ -1,23 +1,22 @@
 // ==UserScript==
-// @name        Kasi-time
+// @name        Animesong
 // @namespace   https://twitter.com/akameco
-// @description 不可能を可能にする
-// @include     http://www.kasi-time.com/*
-// @version     1.00
+// @description いわゆるコピペを可能とするアレ
+// @include     http://www.jtw.zaq.ne.jp/animesong/*
+// @version     1
 // @grant       none
 // ==/UserScript==
 
 // enable focus text
 function enableCopyText() {
-  for (let i=0; i < document.body.attributes.length; ++i) {
-    document.body.setAttribute(document.body.attributes[i].name,"return true");
-  }
-  document.getElementById("center").setAttribute("onmousedown","return true");
+  // set attributes for body 
+  document.body.setAttribute("oncontextmenu","return true");
+  document.body.setAttribute("onselectstart","return true");
 }
 
 // select all textarea
-function selectText() {
-  let element= document.querySelector(".mainkashi");
+function selectText(c) {
+  let element= document.querySelector(c);
   // create range
   let rng = document.createRange();
   rng.selectNodeContents(element);
@@ -28,6 +27,7 @@ function selectText() {
 // create new button
 function createCopyButton() {
   let button = document.createElement("button");
+  // set text 
   button.innerHTML = "選択";
   button.style.margin = "0px 0px 10px 0px";
   button.style.borderTop = "1px solid #ccc";
@@ -37,12 +37,13 @@ function createCopyButton() {
   button.style.padding = "3px 12px";
   button.style.cursor = "pointer";
   button.style.color = "#666";
-  button.addEventListener("click",function(){selectText()},false);
-  let frame = document.querySelector("#kashi_flame");
+
+  button.addEventListener("click",function(){selectText(".b")},false);
+  let frame = document.querySelector("tbody");
   frame.appendChild(button);
-  console.log(button.parentNode);
   // swap elements
   button.parentNode.insertBefore(button,button.parentNode.firstChild);
+
 }
 
 window.onload = function () {
@@ -50,4 +51,4 @@ window.onload = function () {
     enableCopyText(); 
     createCopyButton();
   }, 10);
-}  
+} 
