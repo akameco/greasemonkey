@@ -15,3 +15,8 @@ Pocketの登録においてタグを付けずにそのままsaveをクリック�
 
 ## Kasi-time
 [歌詞タイム](http://www.kasi-time.com "歌詞タイム")で歌詞を選択状態にするボタンを追加し、歌詞をコピペ可能にする  
+
+#TwitterProfileExtendFavstar.user.js
+twitterのプロフィールの最後に[ favstar ](http://ja.favstar.fm)へのリンクを作成.1クリックで各アカウントのベストツイートを見ることができる.
+
+
