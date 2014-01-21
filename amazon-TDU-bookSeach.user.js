@@ -12,6 +12,7 @@
 // TODO:ibsnを利用
 
 // tduオブジェクトを定義
+// TODO:classを使用する
 var tdu = tdu ? tdu : new Object();
 // とりあえず簡易検索ページへのリンク
 tdu.mediacenter = 'http://lib.mrcl.dendai.ac.jp/wwwopac.html';
@@ -43,8 +44,7 @@ function addStyle() {
     padding: 5px 2px;\
   }\
   div#tdu_link a{\
-    background:#4169E1;\
-    color: #1E90FF;\
+    color: #D6FCFF;\
     margin: 10px 5px;\
     font-size: 14px;\
   }\
@@ -85,4 +85,4 @@ function createLink() {
 // TODO:蔵書ごとにlinkをつくる
 function showLink() {
 } 
-
+  
