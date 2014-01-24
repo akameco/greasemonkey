@@ -8,15 +8,8 @@
 // @grant       none
 // ==/UserScript==
 
-
-// TODO:ibsnを利用
-
-// tduオブジェクトを定義
-// TODO:classを使用する
-var tdu = tdu ? tdu : new Object();
-// とりあえず簡易検索ページへのリンク
-tdu.mediacenter = 'http://lib.mrcl.dendai.ac.jp/wwwopac.html';
-
+// ベースURL
+var baseURL = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?';
 
 window.onload = function () {
   main();
@@ -24,18 +17,18 @@ window.onload = function () {
 
 // main関数
 function main() {
-  console.log(tdu.mediacenter);
   if(checkCategory()){
     createLink();
   }
-  var href = document.location.href;
+  let href = document.location.href;
   addStyle();
+  create();
 }
 
 // css定義
 // TODO:スタイルをサイトに合うように
 function addStyle() {
-  var style = "\
+  let style = "\
   div#tdu_link{\
     background: #4169E1;\
     width: 180px;\
@@ -52,8 +45,8 @@ function addStyle() {
     color: #6A5ACD;\
   }\
   ";
-  var head = document.getElementsByTagName('head')[0];
-  var element = head.appendChild(window.document.createElement('style'));
+  let head = document.getElementsByTagName('head')[0];
+  let element = head.appendChild(window.document.createElement('style'));
   element.type = "text/css";
   element.textContent = style;
 }
@@ -61,7 +54,7 @@ function addStyle() {
 // カテゴリが合っているか確認
 // TODO:カテゴリチェックをurlでする関数に変更
 function checkCategory() {
-  var category = document.querySelector('.nav-category-button').firstChild.innerHTML;
+  let category = document.querySelector('.nav-category-button').firstChild.innerHTML;
   if(category == '本'){
     return true;
   }
@@ -70,14 +63,18 @@ function checkCategory() {
 
 // createelement
 function createLink() {
-  var div = document.createElement('div');
+  //form#handleBuy div.buying
+  //html body.dp div#divsinglecolumnminwidth.singlecolumnminwidth
+  let div = document.createElement('div');
   div.setAttribute('id','tdu_link');
-  var link = document.createElement('a');
-  link.setAttribute('href','http://lib.mrcl.dendai.ac.jp/wwwopac.html');
+  let link = document.createElement('a');
+  //link.setAttribute('href', "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=4774158798");
   link.setAttribute('target','_blank');
   link.textContent = 'メディセン検索するのんな';
   link.addEventListener("click",showLink,false);
-  var p = document.querySelectorAll('.buying')[1];
+  // linkの表示場所の起点とするノードを取得
+  let btAsinTitleDiv = parent.document.getElementById('btAsinTitle');
+  let p = btAsinTitleDiv.parentNode;
   div.appendChild(link);
   p.appendChild(div);
 }
@@ -85,4 +82,44 @@ function createLink() {
 // TODO:蔵書ごとにlinkをつくる
 function showLink() {
 } 
-  
+
+function create() {
+  // テスト用のURL
+  var url = "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=4774158798"
+  var xhr = new XMLHttpRequest();
+  // テスト用のパラメータ
+  var str = "isbn_issn=978-4062187640";
+
+  //xhr.open( 'GET', baseURL+str);
+  xhr.open('GET',url,true);
+
+  try{
+    xhr.onreadystatechange = function () {
+      //TODO:statusがどうしても0になる
+      //ローカルを参照してるっぽい？キャッシュ対策が必要？
+      if(xhr.readyState == 4  && xhr.status == 200){
+        alert("ok");
+      }
+    }
+    xhr.send(null);
+  }catch(err){
+    alert(err);
+  }
+
+  // データをリクエスト ボディに含めて送信する
+  console.log(xhr.responseText);
+  console.log(xhr);
+}
+
+function addLibraryLinksToBookPage(isbn){
+  // linkの表示場所の起点とするノードを取得
+  let btAsinTitleDiv = parent.document.getElementById('btAsinTitle');
+  if (btAsinTitleDiv) {
+    let div = btAsinTitleDiv.parentNode;
+  }
+}
+// isbn
+function getIsbn() {
+
+}
+ 
