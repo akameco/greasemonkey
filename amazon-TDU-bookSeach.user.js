@@ -12,13 +12,13 @@ window.onload = function () {
   // カテゴリのチェック
   if(!checkCategory())
     return;
-  var isbn = getIsbn();
+  let isbn = getIsbn();
   // 取得確認
   if(isbn){
-    var text = getBookData(isbn);
+    let text = getBookData(isbn);
     createLink(isbn);
     loading();
-  //  addStyle();
+    //  addStyle();
   }
 }
 
@@ -34,9 +34,11 @@ function getIsbn() {
 function getBookData(isbn) {
   let request = new XMLHttpRequest();
   let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' + isbn;
+  // 一度allow-any-originを噛ませることでクロスドメイン制限対策
   request.open('GET','http://allow-any-origin.appspot.com/' + link,true);
   request.send(); 
   request.onload = function () {
+    // htmlをパースして情報を取得
     parseHtml(request.responseText);
   }
 }
@@ -77,30 +79,35 @@ function checkCategory() {
   return false;
 }
 
-// リンクを作成する
+// 図書館へのリンク
 function createLink(isbn) {
-  let div = document.createElement('div');
-  div.setAttribute('id','tdu_link');
-  let link = document.createElement('a');
-  link.setAttribute('href', "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=" + isbn);
-  link.setAttribute('target','_blank');
-  link.textContent = 'メディセン検索するのんな';
-  //link.addEventListener("click",showLink,false);
-  let btAsinTitleDiv = parent.document.getElementById('btAsinTitle');
-  let p = btAsinTitleDiv.parentNode;
+  let div = neoCreate('div',{id:'tdu_link'});
+  let link = neoCreate('a',
+    {
+      href:"http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=" + isbn,
+      target: '_blank'
+    },
+    "図書館検索"
+  );
+  let p = parent.document.getElementById('btAsinTitle').parentNode;
   div.appendChild(link);
   p.appendChild(div);
 }
 
-// TODO:蔵書ごとにlinkをつくる
-function showLink() {
-} 
 
-
-function createButton() {
-
+// エレメント作成
+function neoCreate(tag,attr,content) {
+  var dom = document.createElement(tag);
+  for (var key in attr) {
+    dom.setAttribute(key,attr[key]);
+  }
+  if(content){
+    dom.textContent = content;
+  }
+  return dom;
 }
 
+// ロード状態の表示
 function loading() {
   let div = document.createElement('div');
   div.setAttribute('id','loading');
@@ -109,11 +116,13 @@ function loading() {
   p.appendChild(div);
 }
 
+// ロード表示の削除 
 function removeLoading() {
   let element = document.getElementById('loading');
   element.parentNode.removeChild(element);
 }
 
+// 
 function parseHtml(res) {
   let div = document.createElement('div');
   div.innerHTML = res;
