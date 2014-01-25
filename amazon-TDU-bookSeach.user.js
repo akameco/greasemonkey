@@ -17,7 +17,8 @@ window.onload = function () {
   if(isbn){
     var text = getBookData(isbn);
     createLink(isbn);
-    addStyle();
+    loading();
+  //  addStyle();
   }
 }
 
@@ -100,6 +101,19 @@ function createButton() {
 
 }
 
+function loading() {
+  let div = document.createElement('div');
+  div.setAttribute('id','loading');
+  div.textContent = "now loading...";
+  let p = parent.document.getElementById('btAsinTitle').parentNode;
+  p.appendChild(div);
+}
+
+function removeLoading() {
+  let element = document.getElementById('loading');
+  element.parentNode.removeChild(element);
+}
+
 function parseHtml(res) {
   let div = document.createElement('div');
   div.innerHTML = res;
@@ -108,8 +122,9 @@ function parseHtml(res) {
 
 // 状態の表示
 function getObj(html) {
+  removeLoading();
   let div = document.createElement('div');
-  div.setAttribute('id','books');
+  div.setAttribute('id','tduBooks');
   // 要素の調査
   let tbody = html.querySelectorAll('.flst_head')[0].parentNode;
   for (let i=1; i < tbody.children.length; ++i) {
@@ -126,7 +141,7 @@ function getObj(html) {
     if(state == "貸出中"){
       let priod = tr.children[9].firstChild.firstChild.nodeValue;
       console.log(priod);
-      element.innerHTML = plase + ":" + state + priod;
+      element.innerHTML = plase + ":" + state + ":" + priod;
     }else{
       element.innerHTML = plase + ":" + state;
     }
