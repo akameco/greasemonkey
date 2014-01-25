@@ -9,20 +9,44 @@
 // ==/UserScript==
 
 // ベースURL
-var baseURL = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?';
+//var baseURL = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?';
 
 window.onload = function () {
-  main();
+  // カテゴリのチェック
+  if(!checkCategory())
+    return;
+  var isbn = getIsbn();
+  // 取得確認
+  if(isbn){
+    getBookData(isbn);
+    createLink(isbn);
+    addStyle();
+  }
 }
 
-// main関数
-function main() {
-  if(checkCategory()){
-    createLink();
+function getIsbn() {
+  // HTMLでなければ終了
+  //if(document.contentType != 'text/html')
+  //  return;
+  // ASINを見つけるよ
+  document.body.parentNode.innerHTML.match(/name=\"ASIN\" value=\"([0-9A-Z]{10})([\/\-_a-zA-Z0-9]*)/i);
+  // ASINが見つからなければ終了
+  if (RegExp.$1 == '')
+    return;
+  // asinを変数に代入
+  var asin = RegExp.$1; 
+  return asin;
+}
+
+function getBookData(isbn) {
+  let request = new XMLHttpRequest();
+  let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' + isbn;
+  console.log(link);
+  request.open('GET','http://allow-any-origin.appspot.com/' + link,true);
+  request.send(); 
+  if (request.status === 200) {
+    console.log(request.responseText);
   }
-  let href = document.location.href;
-  addStyle();
-  create();
 }
 
 // css定義
@@ -62,13 +86,11 @@ function checkCategory() {
 }
 
 // createelement
-function createLink() {
-  //form#handleBuy div.buying
-  //html body.dp div#divsinglecolumnminwidth.singlecolumnminwidth
+function createLink(isbn) {
   let div = document.createElement('div');
   div.setAttribute('id','tdu_link');
   let link = document.createElement('a');
-  //link.setAttribute('href', "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=4774158798");
+  link.setAttribute('href', "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=" + isbn);
   link.setAttribute('target','_blank');
   link.textContent = 'メディセン検索するのんな';
   link.addEventListener("click",showLink,false);
@@ -83,33 +105,16 @@ function createLink() {
 function showLink() {
 } 
 
-function create() {
-  // テスト用のURL
-  var url = "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=4774158798"
-  var xhr = new XMLHttpRequest();
-  // テスト用のパラメータ
-  var str = "isbn_issn=978-4062187640";
-
-  //xhr.open( 'GET', baseURL+str);
-  xhr.open('GET',url,true);
-
-  try{
-    xhr.onreadystatechange = function () {
-      //TODO:statusがどうしても0になる
-      //ローカルを参照してるっぽい？キャッシュ対策が必要？
-      if(xhr.readyState == 4  && xhr.status == 200){
-        alert("ok");
-      }
-    }
-    xhr.send(null);
-  }catch(err){
-    alert(err);
-  }
-
-  // データをリクエスト ボディに含めて送信する
-  console.log(xhr.responseText);
-  console.log(xhr);
-}
+//function create() {
+//  var url = "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?"
+//  //isbn_issn=4774158798
+//  //var xhr = new XMLHttpRequest();
+//  //var google = "https://www.google.co.jp/";
+//  //var str = "isbn_issn=978-4774158792";
+//  //var time = new Date().getTime();
+//  //var url = baseURL + str + "&t=" + time;
+//
+//}
 
 function addLibraryLinksToBookPage(isbn){
   // linkの表示場所の起点とするノードを取得
@@ -117,9 +122,4 @@ function addLibraryLinksToBookPage(isbn){
   if (btAsinTitleDiv) {
     let div = btAsinTitleDiv.parentNode;
   }
-}
-// isbn
-function getIsbn() {
-
-}
- 
+} 
