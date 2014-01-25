@@ -8,9 +8,6 @@
 // @grant       none
 // ==/UserScript==
 
-// ベースURL
-//var baseURL = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?';
-
 window.onload = function () {
   // カテゴリのチェック
   if(!checkCategory())
@@ -18,34 +15,28 @@ window.onload = function () {
   var isbn = getIsbn();
   // 取得確認
   if(isbn){
-    getBookData(isbn);
+    var text = getBookData(isbn);
     createLink(isbn);
     addStyle();
   }
 }
 
+// isbnを取得
 function getIsbn() {
-  // HTMLでなければ終了
-  //if(document.contentType != 'text/html')
-  //  return;
-  // ASINを見つけるよ
+  // ASIN=isbn ASINの取得が容易
   document.body.parentNode.innerHTML.match(/name=\"ASIN\" value=\"([0-9A-Z]{10})([\/\-_a-zA-Z0-9]*)/i);
-  // ASINが見つからなければ終了
-  if (RegExp.$1 == '')
-    return;
-  // asinを変数に代入
-  var asin = RegExp.$1; 
-  return asin;
+  //var asin = RegExp.$1; 
+  return RegExp.$1;
 }
 
+// 非同期通信により蔵書情報取得
 function getBookData(isbn) {
   let request = new XMLHttpRequest();
   let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' + isbn;
-  console.log(link);
   request.open('GET','http://allow-any-origin.appspot.com/' + link,true);
   request.send(); 
-  if (request.status === 200) {
-    console.log(request.responseText);
+  request.onload = function () {
+    parseHtml(request.responseText);
   }
 }
 
@@ -85,7 +76,7 @@ function checkCategory() {
   return false;
 }
 
-// createelement
+// リンクを作成する
 function createLink(isbn) {
   let div = document.createElement('div');
   div.setAttribute('id','tdu_link');
@@ -93,8 +84,7 @@ function createLink(isbn) {
   link.setAttribute('href', "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=" + isbn);
   link.setAttribute('target','_blank');
   link.textContent = 'メディセン検索するのんな';
-  link.addEventListener("click",showLink,false);
-  // linkの表示場所の起点とするノードを取得
+  //link.addEventListener("click",showLink,false);
   let btAsinTitleDiv = parent.document.getElementById('btAsinTitle');
   let p = btAsinTitleDiv.parentNode;
   div.appendChild(link);
@@ -105,21 +95,43 @@ function createLink(isbn) {
 function showLink() {
 } 
 
-//function create() {
-//  var url = "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?"
-//  //isbn_issn=4774158798
-//  //var xhr = new XMLHttpRequest();
-//  //var google = "https://www.google.co.jp/";
-//  //var str = "isbn_issn=978-4774158792";
-//  //var time = new Date().getTime();
-//  //var url = baseURL + str + "&t=" + time;
-//
-//}
 
-function addLibraryLinksToBookPage(isbn){
-  // linkの表示場所の起点とするノードを取得
-  let btAsinTitleDiv = parent.document.getElementById('btAsinTitle');
-  if (btAsinTitleDiv) {
-    let div = btAsinTitleDiv.parentNode;
+function createButton() {
+
+}
+
+function parseHtml(res) {
+  let div = document.createElement('div');
+  div.innerHTML = res;
+  getObj(div);
+}
+
+// 状態の表示
+function getObj(html) {
+  let div = document.createElement('div');
+  div.setAttribute('id','books');
+  // 要素の調査
+  let tbody = html.querySelectorAll('.flst_head')[0].parentNode;
+  for (let i=1; i < tbody.children.length; ++i) {
+    let element = document.createElement('div');
+    let tr = tbody.children[i];
+    // 所蔵館
+    let plase = tr.children[3].firstChild.firstChild.nodeValue;
+    console.log(plase);
+    // 状態
+    let state = tr.children[8].firstChild.firstChild.nodeValue;
+    console.log(state);
+    // 返却期限日
+    // 配架済 or 貸出中
+    if(state == "貸出中"){
+      let priod = tr.children[9].firstChild.firstChild.nodeValue;
+      console.log(priod);
+      element.innerHTML = plase + ":" + state + priod;
+    }else{
+      element.innerHTML = plase + ":" + state;
+    }
+    div.appendChild(element);
   }
+  let p = parent.document.getElementById('btAsinTitle').parentNode;
+  p.appendChild(div);
 } 
