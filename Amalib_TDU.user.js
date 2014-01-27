@@ -1,16 +1,28 @@
 // ==UserScript==
 // @name        Amalib_TDU
 // @namespace   https://twitter.com/akameco
-// @description AmazonとTDUMediaセンターの蔵書検索をリンク
+// @description 図書館乞食捗るよ！
 // @author      akameco
 // @include     http://www.amazon.co.jp/*
+// @include     http://lib.mrcl.dendai.ac.jp/*
 // @include     https://lib.mrcl.dendai.ac.jp/*
 // @version     1.00
 // @grant       none
 // ==/UserScript==
 (function () {
+    // エレメント作成用ユーティリティ関数
+    var neoCreate = function(tag,attr,content) {
+      let dom = document.createElement(tag);
+      for (let key in attr) {
+        dom.setAttribute(key,attr[key]);
+      }
+      if(content){
+        dom.textContent = content;
+      }
+      return dom;
+    };
 
-    // amazon内情報
+    // amazon
     let amazon = {
       // 書籍情報のテキスト
       info: {
@@ -20,10 +32,11 @@
           return RegExp.$1;
         },
         get title(){
-          return document.getElementById('btAsinTitle').textContent;
+          return document.getElementById('btAsinTitle').firstChild.textContent;
         },
         get press(){
-          return undefined;
+          let e = document.body.innerHTML.match(/出版社:<\/b> (.+?)\(/);
+          return RegExp.$1;
         },
         get price(){
           let text = document.querySelectorAll("#actualPriceValue .priceLarge")[0].textContent;
@@ -31,12 +44,14 @@
           return text.replace(/￥ /,"").replace("\n","").replace(",","");
         }
       },
+
       // ノードの特定
       node: {
         get btAsinTitle(){
           return document.getElementById('btAsinTitle').parentNode;
         }
       },
+
       // 表示
       disp: {
         // 図書館へのリンク
@@ -74,13 +89,13 @@
         // TODO:フォームにamazonの情報をぶち込む
         orderLink: function() {
           let p = amazon.node.btAsinTitle;
-          let link = "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn;
+          let link = "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn + "&title=" + amazon.info.title + "&press=" + amazon.info.press + "&price=" + amazon.info.price;
           let a = neoCreate('a',{href:link},"購入依頼");
           p.appendChild(a);
         },
 
         // 各図書館の蔵書状況の表示
-        libray: function(html) {
+        library: function(html) {
           let div = neoCreate('div',{id:'tduBooks'});
           // 要素の調査
           let tbody = html.querySelectorAll('.flst_head')[0].parentNode;
@@ -104,6 +119,42 @@
           p.appendChild(div);
         }
       },
+
+      // メソッド
+
+      // カテゴリ確認
+      category: function() {
+        let category = document.querySelector('.nav-category-button').firstChild.innerHTML;
+        if(category == '本'){
+          return true;
+        }
+        return false;
+      },
+
+      // 蔵書のページ確認
+      page: function (res) {
+        // 一度ノードに変換しないとdom操作ができない
+        let html = document.createElement('div');
+        html.innerHTML = res;
+        let element = html.querySelector('.flst_head');
+        element != null ? amazon.disp.library(html) : amazon.disp.orderLink();
+      },
+
+      // 非同期通信により蔵書情報取得
+      getLib: function () {
+        let request = new XMLHttpRequest();
+        let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' + amazon.info.isbn;
+        // 一度allow-any-originを噛ませることでクロスドメイン制限対策
+        request.open('GET','http://allow-any-origin.appspot.com/' + link,true);
+        request.send(); 
+        request.onload = function () {
+          // ロード状態の解除
+          amazon.disp.removeLoading();
+          // htmlをパースして情報を取得
+          amazon.page(request.responseText);
+        }
+      },
+
       // css定義
       style: function() {
         let style = "\
@@ -128,99 +179,78 @@
         element.type = "text/css";
         element.textContent = style;
         head.appendChild(element);
-      }
-    } 
+      },
 
-    let checkHost = {
-      "www.amazon.co.jp": function () {
+      open: function () {
         // カテゴリのチェック
-        if(!checkCategory())
+        if(!amazon.category())
           return;
         if(amazon.info.isbn){
-          let text = getBookData();
-          //addStyle();
+          amazon.getLib();
           amazon.disp.link();
           console.log(amazon.info.isbn);
           console.log(amazon.info.title);
           console.log(amazon.info.price);
+          console.log(amazon.info.press);
           amazon.disp.loading();
         }
-      },
-      "lib.mrcl.dendai.ac.jp": function () {
-        let loginButton = null;
+      }
+    } 
+
+    // 図書館用
+    let library = {
+
+      open: function () {
+        let loginbutton = null;
         let pass=false;
         let form = document.forms[0];
         form.setAttribute("autocomplete","on");
-        for (let i=0; formElement=form.getElementsByTagName("input")[i]; ++i){
-          if(formElement.type == "password" && formElement.value){
+        for (let j=0; formelement=form.getElementsByTagName("input")[j]; ++j){
+          if(formelement.type == "password" && formelement.value){
             pass = true; 
             break;
           }
         }
-        for (let i=0; formElement=form.getElementsByTagName("input")[i]; ++i){
-          if (formElement.type == "image" && pass) {
-            loginButton = formElement;
+        for (let j=0; formelement=form.getElementsByTagName("input")[j]; ++j){
+          if (formelement.type == "image" && pass) {
+            loginbutton = formelement;
             break;
           }
         }
-        if(loginButton){
-          loginButton.focus();
-          loginButton.click();
+        if(loginbutton){
+          loginbutton.focus();
+          loginbutton.click();
+        }
+      },
+      get path() {
+        return window.location.pathname;
+      },
+      // pathごとにメソッドの起動を変える
+      init: {
+        "/webopac/ctlsrh.do": function () {
+
+        },
+        "/webopac/odridf.do": function () {
+
+        },
+        "/webopac/odrexm.do": function () {
+          library.open();
         }
       }
-    }
+    };
 
-    // 非同期通信により蔵書情報取得
-    function getBookData() {
-      let request = new XMLHttpRequest();
-      let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' + amazon.info.isbn;
-      // 一度allow-any-originを噛ませることでクロスドメイン制限対策
-      request.open('GET','http://allow-any-origin.appspot.com/' + link,true);
-      request.send(); 
-      request.onload = function () {
-        // ロード状態の解除
-        amazon.disp.removeLoading();
-        // htmlをパースして情報を取得
-        parseHtml(request.responseText);
-      }
-    }
-
-    // カテゴリが合っているか確認
-    function checkCategory() {
-      let category = document.querySelector('.nav-category-button').firstChild.innerHTML;
-      if(category == '本'){
-        return true;
-      }
-      return false;
-    }
-
-    // エレメント作成
-    function neoCreate(tag,attr,content) {
-      let dom = document.createElement(tag);
-      for (let key in attr) {
-        dom.setAttribute(key,attr[key]);
-      }
-      if(content){
-        dom.textContent = content;
-      }
-      return dom;
-    }
-
-    // 一度divに変換しないとdom操作ができない
-    function parseHtml(res) {
-      let div = document.createElement('div');
-      div.innerHTML = res;
-      hasBook(div);
-    }
-
-    // 蔵書のページ確認
-    function hasBook(html) {
-      let element = html.querySelector('.flst_head');
-      element != null ? amazon.disp.libray(html) : amazon.disp.orderLink();
+    // urlを確認
+    let checkHost = {
+      "www.amazon.co.jp": function () {
+        amazon.open();
+      },
+      "lib.mrcl.dendai.ac.jp": function () {
+        library.init[library.path]();
+      }       
     }
 
     window.onload = function () {
       let host = location.host;
       checkHost[host]();
     }
-})(); 
+})();  
