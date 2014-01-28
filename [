@@ -235,19 +235,24 @@
         }
         return null;
       },
-      input: function () {
-        let tds = document.querySelectorAll('table.opt_frame tbody tr td input');
-        let values = {
-          "bibtr": library.search['title'],
-          "bibpb": library.search['press'],
-          "isbn": library.search['isbn'],
-          "bibpr": library.search['price']
-        };
+      dom: function () {
+        // html body.body table.frame tbody tr.height_100 td table.function tbody tr.func_body td form table.opt_frame tbody tr td input
+        let form = document.querySelector('table.opt_frame tbody tr td input');
+        form.value = library.search["title"];
+        tds = document.querySelectorAll('table.opt_frame tbody tr td input');
+        console.log(tds);
+        let names = ["bibtr","bibpb","isbn","bibpr"];
+        let names = {
+          "bibtr": library.search['title'];
+        }
         for (let i=0; i < tds.length; ++i) {
+          //console.log(tds[i].getAttribute('name'));
           let td = tds[i].getAttribute('name');
-          for(let name in values) 
-            if(td == name)
-            tds[i].value = values[name];
+          for (let j=0; j < names.length; ++j) {
+            if(td == names[j]){
+              tds[i].value = 
+            }
+          }
         }
       },
       // pathごとにメソッドの起動を変える
@@ -256,7 +261,8 @@
 
         },
         "/webopac/odridf.do": function () {
-          library.input();
+          console.log(library.search);
+          library.dom();
         },
         "/webopac/odrexm.do": function () {
           library.open();
@@ -278,4 +284,4 @@
       let host = location.host;
       checkHost[host]();
     }
-})();  
+})(); 
