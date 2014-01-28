@@ -40,7 +40,6 @@
         },
         get price(){
           let text = document.querySelectorAll("#actualPriceValue .priceLarge")[0].textContent;
-          // TODO:正規表現
           return text.replace(/￥ /,"").replace("\n","").replace(",","");
         }
       },
@@ -70,11 +69,10 @@
         },
 
         // ロード状態の表示
-        // TODO:状態が分かるようにアニメーションを追加
         loading: function() {
           let div = document.createElement('div');
           div.setAttribute('id','loading');
-          div.textContent = "now loading...";
+          div.textContent = "NOW LOADING...";
           let p = amazon.node.btAsinTitle;
           p.appendChild(div);
         },
@@ -86,7 +84,6 @@
         },
 
         // 購入依頼のリンク作成
-        // TODO:フォームにamazonの情報をぶち込む
         orderLink: function() {
           let p = amazon.node.btAsinTitle;
           let link = "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn + "&title=" + encodeURIComponent(amazon.info.title) + "&press=" + encodeURIComponent(amazon.info.press) + "&price=" + amazon.info.price;
@@ -94,7 +91,11 @@
           let a = neoCreate('a',{href: link},"購入依頼");
           p.appendChild(a);
         },
-
+        // 自大学の場所をカラーリング
+        get home(){
+          //let plase = ['千住','鳩山','千葉'];
+          return '千住';
+        }, 
         // 各図書館の蔵書状況の表示
         library: function(html) {
           let div = neoCreate('div',{id:'tduBooks'});
@@ -109,7 +110,10 @@
               state: tr.children[8].firstChild.firstChild.nodeValue,
               priod: tr.children[9].firstChild.firstChild.nodeValue
             }
-            if(library.state == "貸出中"){
+            console.log(library.plase);
+            if(library.plase == amazon.disp.home)
+              element.setAttribute('id','myhome');
+            if(library.state == '貸出中'){
               element.innerHTML = library.plase + " " + library.state + " " + "返却期限 " + library.priod;
             }else{
               element.innerHTML = library.plase + " " + library.state;
@@ -157,20 +161,33 @@
       // css定義
       style: function() {
         let style = "\
+        #tduBooks{\
+          background: none;\
+          color: #666;\
+          font-size: 16px;\
+          display:table;\
+          margin: 0 15px 0;\
+        }\
+        #tduBooks div{\
+          margin: 0px 15px;\
+        }\
         div#tdu_link{\
-          background: #4169E1;\
-          width: 180px;\
           display: table;\
-          margin: 10px 5px;\
-          padding: 5px 2px;\
+          margin: 2px 0 2px;\
         }\
         div#tdu_link a{\
-          color: #D6FCFF;\
           margin: 10px 5px;\
-          font-size: 14px;\
+          font-size: 16px;\
         }\
-        div#tdu_link a:hover{\
-          color: #6A5ACD;\
+        #loading{\
+          display: table;\
+          font-size: 16px;\
+          color: #666;\
+          margin: 0px 15px;\
+        }\
+        #myhome {\
+          color:#009900;\
+          font-weight: bold;\
         }\
         ";
         let head = document.getElementsByTagName('head')[0];
@@ -187,11 +204,8 @@
         if(amazon.info.isbn){
           amazon.getLib();
           amazon.disp.link();
-          console.log(amazon.info.isbn);
-          console.log(amazon.info.title);
-          console.log(amazon.info.price);
-          console.log(amazon.info.press);
           amazon.disp.loading();
+          amazon.style();
         }
       }
     } 
@@ -245,11 +259,12 @@
         };
         for (let i=0; i < tds.length; ++i) {
           let td = tds[i].getAttribute('name');
-          for(let name in values) 
+          for(let name in values)
             if(td == name)
             tds[i].value = values[name];
         }
       },
+
       // pathごとにメソッドの起動を変える
       init: {
         "/webopac/ctlsrh.do": function () {
@@ -278,4 +293,4 @@
       let host = location.host;
       checkHost[host]();
     }
-})();  
+})();
