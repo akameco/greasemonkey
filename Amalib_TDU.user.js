@@ -89,8 +89,9 @@
         // TODO:フォームにamazonの情報をぶち込む
         orderLink: function() {
           let p = amazon.node.btAsinTitle;
-          let link = "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn + "&title=" + amazon.info.title + "&press=" + amazon.info.press + "&price=" + amazon.info.price;
-          let a = neoCreate('a',{href:link},"購入依頼");
+          let link = "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn + "&title=" + encodeURIComponent(amazon.info.title) + "&press=" + encodeURIComponent(amazon.info.press) + "&price=" + amazon.info.price;
+
+          let a = neoCreate('a',{href: link},"購入依頼");
           p.appendChild(a);
         },
 
@@ -199,7 +200,6 @@
 
     // 図書館用
     let library = {
-
       open: function () {
         let loginbutton = null;
         let pass=false;
@@ -225,13 +225,25 @@
       get path() {
         return window.location.pathname;
       },
+      get search(){
+        if(1 < document.location.search.length){
+          let parameters = document.location.search.substring(1).split('&');
+          var result = new Object();
+          for (let i=0; i < parameters.length; ++i) {
+            let element = parameters[i].split('=');
+            result[decodeURIComponent(element[0])] = decodeURIComponent(element[1]);
+          }
+          return result;
+        }
+        return null;
+      },
       // pathごとにメソッドの起動を変える
       init: {
         "/webopac/ctlsrh.do": function () {
 
         },
         "/webopac/odridf.do": function () {
-
+          console.log(library.search);
         },
         "/webopac/odrexm.do": function () {
           library.open();
