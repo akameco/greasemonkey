@@ -11,7 +11,7 @@
 // ==/UserScript==
 (function () {
     // エレメント作成用ユーティリティ関数
-    var neoCreate = function(tag,attr,content) {
+    let neoCreate = function(tag,attr,content) {
       let dom = document.createElement(tag);
       for (let key in attr) {
         dom.setAttribute(key,attr[key]);
@@ -24,8 +24,9 @@
 
     // amazon
     let amazon = {
-      // 書籍情報のテキスト
+      // amazon内ノード情報
       info: {
+        // 書籍情報のテキスト
         get isbn(){
           // ASIN=isbn ASINの取得が容易
           document.body.parentNode.innerHTML.match(/name=\"ASIN\" value=\"([0-9A-Z]{10})([\/\-_a-zA-Z0-9]*)/i);
@@ -49,6 +50,35 @@
         get btAsinTitle(){
           return document.getElementById('btAsinTitle').parentNode;
         }
+      },
+
+      // 図書館情報
+      library: {
+        setPlace: function(){
+          // localStorage.removeItem('place');
+          let places = ['千住','千葉','鳩山'];
+          if(localStorage.getItem('place') == null){
+            let p = amazon.node.btAsinTitle;
+            let div = neoCreate('div',{id:'selectLib'});
+            let text = neoCreate('p',null,"ここに文章をいれよう！");
+            for (let i=0; i < places.length; ++i) {
+              let element = neoCreate('a',{href:'javascript:void(0)'},places[i]);
+              element.addEventListener('click',function (event) {
+                  console.log(event.target.text);
+                  localStorage.setItem('place',event.target.text);
+                  div.parentNode.removeChild(div);
+                  //amazon.disp.link();
+              },false);
+              div.appendChild(element);
+            }
+            p.appendChild(text);
+            p.appendChild(div);
+          }
+        },
+        // 図書館の場所
+        get home(){
+          return localStorage.getItem('place');
+        } 
       },
 
       // 表示
@@ -87,17 +117,12 @@
         orderLink: function() {
           let p = amazon.node.btAsinTitle;
           let link = "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn + "&title=" + encodeURIComponent(amazon.info.title) + "&press=" + encodeURIComponent(amazon.info.press) + "&price=" + amazon.info.price;
-
-          let a = neoCreate('a',{href: link},"購入依頼");
+          let a = neoCreate('a',{href: link,id: 'order'},"購入依頼");
           p.appendChild(a);
         },
-        // 自大学の場所をカラーリング
-        get home(){
-          //let plase = ['千住','鳩山','千葉'];
-          return '千住';
-        }, 
+
         // 各図書館の蔵書状況の表示
-        library: function(html) {
+        libLink: function(html) {
           let div = neoCreate('div',{id:'tduBooks'});
           // 要素の調査
           let tbody = html.querySelectorAll('.flst_head')[0].parentNode;
@@ -106,17 +131,16 @@
             let tr = tbody.children[i];
             // 所蔵館・状態・返却期限日(配架済 or 貸出中)
             let library = {
-              plase: tr.children[3].firstChild.firstChild.nodeValue,
+              place: tr.children[3].firstChild.firstChild.nodeValue,
               state: tr.children[8].firstChild.firstChild.nodeValue,
               priod: tr.children[9].firstChild.firstChild.nodeValue
             }
-            console.log(library.plase);
-            if(library.plase == amazon.disp.home)
+            if(library.place == amazon.library.home)
               element.setAttribute('id','myhome');
             if(library.state == '貸出中'){
-              element.innerHTML = library.plase + " " + library.state + " " + "返却期限 " + library.priod;
+              element.innerHTML = library.place + " " + library.state + " " + "返却期限 " + library.priod;
             }else{
-              element.innerHTML = library.plase + " " + library.state;
+              element.innerHTML = library.place + " " + library.state;
             }
             div.appendChild(element);
           }
@@ -125,7 +149,8 @@
         }
       },
 
-      // カテゴリ確認
+      // 関数定義
+      // カテゴリ確認(urlで判断した方がかっこよさげ)
       category: function() {
         let category = document.querySelector('.nav-category-button').firstChild.innerHTML;
         if(category == '本'){
@@ -140,7 +165,7 @@
         let html = document.createElement('div');
         html.innerHTML = res;
         let element = html.querySelector('.flst_head');
-        element != null ? amazon.disp.library(html) : amazon.disp.orderLink();
+        element != null ? amazon.disp.libLink(html) : amazon.disp.orderLink();
       },
 
       // 非同期通信により蔵書情報取得
@@ -184,10 +209,17 @@
           font-size: 16px;\
           color: #666;\
           margin: 0px 15px;\
+          padding: 2px 15px\
         }\
         #myhome {\
           color:#009900;\
           font-weight: bold;\
+        }\
+        #order {\
+          display: table;\
+          font-size: 16px;\
+          margin: 5px 15px;\
+          padding: 2px 15px\
         }\
         ";
         let head = document.getElementsByTagName('head')[0];
@@ -204,6 +236,7 @@
         if(amazon.info.isbn){
           amazon.getLib();
           amazon.disp.link();
+          amazon.library.setPlace();
           amazon.disp.loading();
           amazon.style();
         }
@@ -268,12 +301,15 @@
       // pathごとにメソッドの起動を変える
       init: {
         "/webopac/ctlsrh.do": function () {
-
+          // マイラブリーエンジェルあやせたん
         },
         "/webopac/odridf.do": function () {
           library.input();
         },
         "/webopac/odrexm.do": function () {
+          library.open();
+        },
+        "/webopac/rsvexm.do":function () {
           library.open();
         }
       }
@@ -287,10 +323,10 @@
       "lib.mrcl.dendai.ac.jp": function () {
         library.init[library.path]();
       }       
-    }
+    }                  
 
     window.onload = function () {
       let host = location.host;
       checkHost[host]();
     }
-})();
+})();  
