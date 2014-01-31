@@ -44,7 +44,7 @@
           return document.getElementById('btAsinTitle').firstChild.textContent;
         },
         get press(){
-          let e = document.body.innerHTML.match(/出版社:<\/b> (.+?)\(/);
+          document.body.innerHTML.match(/出版社:<\/b> (.+?)\(/);
           return RegExp.$1;
         },
         get price(){
@@ -102,19 +102,6 @@
         } 
       },
 
-      submit: function() {
-        let f=document.getElementById("f0")
-        if(f)
-          f.parentNode.removeChild(f);
-        let f = neoCreate('form',{id:'f0',action:'url',method:"post"});
-
-        f.style.display="none";
-        let i = neoCreate('input',{name:"fuga",value:"xxx"});
-        f.appendChild(i);
-        document.getElementsByTagName("body")[0].appendChild(f);
-        console.log(f);
-        f.submit();
-      },
 
       // 表示
       disp: {
@@ -283,6 +270,7 @@
 
     // 図書館用
     let library = {
+      // 自動ログイン
       open: function () {
         let loginbutton = null;
         let pass=false;
@@ -308,7 +296,20 @@
       get path() {
         return window.location.pathname;
       },
-      get search(){
+
+      // システムメッセージが表示されたか確認
+      checkErr: function() {
+        let e = document.body.innerHTML.match('OP-2010-E');
+        if (e) {
+          // リダイレクトする
+          console.log(e);
+        }else{
+          library.input();
+        }
+      },
+
+      // URLをオブジェクトにして返却
+      get parames(){
         if(1 < document.location.search.length){
           let parameters = document.location.search.substring(1).split('&');
           var result = new Object();
@@ -320,13 +321,15 @@
         }
         return null;
       },
+
+      // フォームに自動入力
       input: function () {
         let tds = document.querySelectorAll('table.opt_frame tbody tr td input');
         let values = {
-          "bibtr": library.search['title'],
-          "bibpb": library.search['press'],
-          "isbn": library.search['isbn'],
-          "bibpr": library.search['price']
+          "bibtr": library.parames['title'],
+          "bibpb": library.parames['press'],
+          "isbn": library.parames['isbn'],
+          "bibpr": library.parames['price']
         };
         for (let i=0; i < tds.length; ++i) {
           let td = tds[i].getAttribute('name');
@@ -342,7 +345,7 @@
           // マイラブリーエンジェルあやせたん
         },
         "/webopac/odridf.do": function () {
-          library.input();
+          library.checkErr();
         },
         "/webopac/odrexm.do": function () {
           library.open();
