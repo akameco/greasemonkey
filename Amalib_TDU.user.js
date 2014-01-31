@@ -1,4 +1,4 @@
-// ==UserScript==
+// ==UserScript=
 // @name        Amalib_TDU
 // @namespace   https://twitter.com/akameco
 // @description 図書館乞食捗るよ！
@@ -63,7 +63,7 @@
       library: {
         // 自大学の場所だけカラーリングを設定
         setPlace: function(){
-          localStorage.removeItem('place');
+          //localStorage.removeItem('place');
           let places = ['千住','千葉','鳩山'];
           if(localStorage.getItem('place') == null){
             let div = neoCreate('div',{id:'selectLib'});
@@ -101,7 +101,6 @@
           return localStorage.getItem('place');
         } 
       },
-
 
       // 表示
       disp: {
@@ -257,8 +256,9 @@
 
       open: function () {
         // カテゴリのチェック
-        if(!amazon.category())
+        if(!amazon.category()){
           return;
+        }
         if(amazon.info.isbn){
           amazon.getLib();
           amazon.disp.link();
@@ -302,7 +302,8 @@
         let e = document.body.innerHTML.match('OP-2010-E');
         if (e) {
           // リダイレクトする
-          console.log(e);
+          let url = "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do"+document.location.search;
+          window.open(url,'_self');
         }else{
           library.input();
         }
@@ -367,7 +368,15 @@
     }                  
 
     window.onload = function () {
-      let host = location.host;
-      checkHost[host]();
+      let host = document.location.host;
+      try{
+        let f = checkHost[host];
+        if(f == undefined)
+          return;
+        f();
+      }catch(err){
+        console.log(err);
+      } 
+      return;
     }
 })();  
