@@ -22,6 +22,14 @@
       return dom;
     };
 
+    let setParam = function(name,value) {  
+      let input = neoCreate('input',{
+          "name": name,
+          "value": value
+      });
+      return input;
+    };
+
     // amazon
     let amazon = {
       // amazon内ノード情報
@@ -53,14 +61,14 @@
 
       // 図書館情報
       library: {
+        // 自大学の場所だけカラーリングを設定
         setPlace: function(){
           localStorage.removeItem('place');
           let places = ['千住','千葉','鳩山'];
           if(localStorage.getItem('place') == null){
-            // let p = amazon..btAsinTitle;
             let div = neoCreate('div',{id:'selectLib'});
-            // let text = neoCreate('div',null,"ここに文章をいれよう！");
-            let text = neoCreate('p',{id: 'readme'},"\
+            // TODO: 文章の作成
+            let text = neoCreate('div',{id: 'readme'},"\
               インストール感謝なのです。\n\
               図書館を便利に\
               ここに文章をいれよう！\
@@ -72,13 +80,15 @@
               element.addEventListener('click',function (event) {
                   localStorage.setItem('place',event.target.text);
                   // 現在表示されているものを削除
-                  amazon.btAsinTitle.removeChild(document.getElementById('tdu_link'));
-                  amazon.btAsinTitle.removeChild(document.getElementById('tduBooks'));
-                  amazon.btAsinTitle.removeChild(div);
-                  amazon.btAsinTitle.removeChild(text);
+                  let p = document.querySelector(".parseasinTitle").children;
+                  let len = p.length;
+                  for (let j=1; j < len; ++j){
+                    amazon.btAsinTitle.removeChild(p[1]);
+                  }
                   // 再描写
                   amazon.disp.link();
-                  amazon.disp.libLink();
+                  amazon.info.res.querySelector('.flst_head') != null ?
+                  amazon.disp.libLink() : amazon.disp.orderLink();
               },false);
               div.appendChild(element);
             }
@@ -90,6 +100,20 @@
         get home(){
           return localStorage.getItem('place');
         } 
+      },
+
+      submit: function() {
+        let f=document.getElementById("f0")
+        if(f)
+          f.parentNode.removeChild(f);
+        let f = neoCreate('form',{id:'f0',action:'url',method:"post"});
+
+        f.style.display="none";
+        let i = neoCreate('input',{name:"fuga",value:"xxx"});
+        f.appendChild(i);
+        document.getElementsByTagName("body")[0].appendChild(f);
+        console.log(f);
+        f.submit();
       },
 
       // 表示
@@ -122,10 +146,10 @@
 
         // 購入依頼のリンク作成
         orderLink: function() {
-          let p = amazon.btAsinTitle;
+          // let link = "javascript:void(0)";
           let link = "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn + "&title=" + encodeURIComponent(amazon.info.title) + "&press=" + encodeURIComponent(amazon.info.press) + "&price=" + amazon.info.price;
           let a = neoCreate('a',{href: link,id: 'order'},"購入依頼");
-          p.appendChild(a);
+          amazon.btAsinTitle.appendChild(a);
         },
 
         // 各図書館の蔵書状況の表示
