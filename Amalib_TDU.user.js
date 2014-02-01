@@ -1,4 +1,4 @@
-// ==UserScript=
+// ==UserScript==
 // @name        Amalib_TDU
 // @namespace   https://twitter.com/akameco
 // @description 図書館乞食捗るよ！
@@ -109,7 +109,8 @@
           let div = neoCreate('div',{id:'tdu_link'});
           let link = neoCreate('a',
             {
-              href:"http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=" + amazon.info.isbn,
+
+              href: "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn + "&title=" + encodeURIComponent(amazon.info.title) + "&press=" + encodeURIComponent(amazon.info.press) + "&price=" + amazon.info.price,
               target: '_blank'
             },
             "図書館検索"
@@ -270,6 +271,19 @@
 
     // 図書館用
     let library = {
+      // URLをオブジェクトにして返却
+      get parames(){
+        if(1 < document.location.search.length){
+          let parameters = document.location.search.substring(1).split('&');
+          var result = new Object();
+          for (let i=0; i < parameters.length; ++i) {
+            let element = parameters[i].split('=');
+            result[decodeURIComponent(element[0])] = decodeURIComponent(element[1]);
+          }
+          return result;
+        }
+        return null;
+      },
       // 自動ログイン
       open: function () {
         let loginbutton = null;
@@ -293,9 +307,32 @@
           loginbutton.click();
         }
       },
+
+      // setForm
+      setForm: function() {
+        let form = document.forms[0];
+        form.action = '/webopac/odridf.do' + location.search;
+        library.open();
+      },
+
       get path() {
         return window.location.pathname;
       },
+
+
+      // ログインページを開く
+      openLoginPage: function() {
+        // let url =  "http://lib.mrcl.dendai.ac.jp/webopac/odrexm.do"+document.location.search;
+        //        window.open(url,'_self');
+        orderODR();
+      },
+
+      checkHasBook: function() {
+        let e = document.body.innerHTML.match('指定された条件に該当する資料がありませんでした');
+        if (e) {
+          library.openLoginPage();
+        }
+      },  
 
       // システムメッセージが表示されたか確認
       checkErr: function() {
@@ -309,18 +346,11 @@
         }
       },
 
-      // URLをオブジェクトにして返却
-      get parames(){
-        if(1 < document.location.search.length){
-          let parameters = document.location.search.substring(1).split('&');
-          var result = new Object();
-          for (let i=0; i < parameters.length; ++i) {
-            let element = parameters[i].split('=');
-            result[decodeURIComponent(element[0])] = decodeURIComponent(element[1]);
-          }
-          return result;
-        }
-        return null;
+
+      // ログインページにurlを改変して移行
+      chengeHome: function() {
+        //library.openLoginPage();
+        library.checkHasBook()
       },
 
       // フォームに自動入力
@@ -339,17 +369,26 @@
             tds[i].value = values[name];
         }
       },
+      // isbnのみか他のパラメータがあるかチェック
+      checkParam: function() {
+        let parameters = document.location.search.substring(1).split('&');
+        if(parameters.length < 4)
+          return false;
+        return true;
+      },
 
       // pathごとにメソッドの起動を変える
       init: {
         "/webopac/ctlsrh.do": function () {
-          // マイラブリーエンジェルあやせたん
+          if(library.checkParam())
+            library.chengeHome();
         },
         "/webopac/odridf.do": function () {
           library.checkErr();
         },
         "/webopac/odrexm.do": function () {
-          library.open();
+          if(library.checkParam())
+            library.setForm();
         },
         "/webopac/rsvexm.do":function () {
           library.open();
@@ -365,7 +404,7 @@
       "lib.mrcl.dendai.ac.jp": function () {
         library.init[library.path]();
       }       
-    }                  
+    }
 
     window.onload = function () {
       let host = document.location.host;
@@ -378,5 +417,24 @@
         console.log(err);
       } 
       return;
+    }
+
+    function orderODR() {
+      var w;
+      document.svcodrform.action='https://' + location.host + '/webopac/odrexm.do' + location.search;
+      document.svcodrform.target='Service'+ '1391259716985';
+      // document.svcodrform.mode.value='new';
+      // document.svcodrform.reqType.value='_NEW';
+      // // document.svcodrform.bibbr.value='';
+      // document.svcodrform.bibid.value='';
+      // document.svcodrform.dbTarget.value='LOCAL';
+      // document.svcodrform.volsflg.value='false';
+      // document.svcodrform.isbn.value='';
+      // document.svcodrform.issn.value='';
+      // document.svcodrform.loginType.value='once';
+      w = window.open("", document.svcodrform.target, "toolbar=no, directories=no, menubar=no, status=no, resizable=yes, scrollbars=yes");
+      document.svcodrform.submit();
+      document.svcodrform.target='';
+      w.focus();
     }
 })();  
