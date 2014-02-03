@@ -105,17 +105,17 @@
       library: {
         // 自大学の場所だけカラーリングを設定
         setPlace: function() {
-          localStorage.removeItem('place');
+          // localStorage.removeItem('place');
           let places = ['千住','千葉','鳩山'];
           if(localStorage.getItem('place') == null){
             let div = createElement('div',{id:'selectLib'});
             // TODO: 文章の作成
             let text = createElement('div',{id: 'readme'},
               'インストール感謝なのです。' + 
-              'このプラグインはアマゾンと図書館を連携し便利に\n' +
-              'ここに文章をいれよう！\n' +
-              'まず自分が通っている大学の場所を設定してね\n' +
-              '何か不具合が合ったら赤芽まで\n'
+              '電機大学の図書館の蔵書状況わかるのです。\n' +
+              'まず自分が通っている大学の場所を設定なのです。\n' +
+              '大学の場所を選んでなのです。ハイライトなのです。\n' +
+              '何か不具合等が合ったら赤芽まで連絡なの。\n'
               );
             for (let i=0; i < places.length; ++i) {
               let element = createElement('a',{href:'javascript:void(0)'},places[i]);
@@ -154,7 +154,14 @@
         link: function() {
           let div = createElement('div',{id:'tdu_link'});
           let link = createElement('a',{
-              href: 'https://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn=' + amazon.info.isbn + '&title=' + encodeURIComponent(amazon.info.title) + '&press=' + encodeURIComponent(amazon.info.press) + '&price=' + amazon.info.price,
+              href: 'https://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn=' + 
+              amazon.info.isbn +
+              '&title=' +
+              encodeURIComponent(amazon.info.title) +
+              '&press=' +
+              encodeURIComponent(amazon.info.press) +
+              '&price=' +
+              amazon.info.price,
               target: '_blank'},
             '図書館検索'
           );
@@ -177,7 +184,14 @@
         // 購入依頼のリンク作成
         orderLink: function() {
           // let link = "javascript:void(0)";
-          let link = 'https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=' + amazon.info.isbn + '&title=' + encodeURIComponent(amazon.info.title) + '&press=' + encodeURIComponent(amazon.info.press) + '&price=' + amazon.info.price;
+          let link = 'https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=' +
+                     amazon.info.isbn +
+                     '&title=' +
+                     encodeURIComponent(amazon.info.title) +
+                     '&press=' +
+                     encodeURIComponent(amazon.info.press) +
+                     '&price=' +
+                     amazon.info.price;
           let a = createElement('a',{href: link,id: 'order'},'購入依頼');
           amazon.info.btAsinTitle.appendChild(a);
         },
@@ -200,7 +214,9 @@
               element.setAttribute('id','myhome'); 
             }
             if(library.state == '貸出中'){
-              element.innerHTML = library.place + ' ' + library.state + ' ' + '返却期限 ' + library.priod;
+              element.innerHTML = library.place + ' ' +
+                                  library.state + ' ' +
+                                  '返却期限 ' + library.priod;
             }else{
               element.innerHTML = library.place + ' ' + library.state;
             }
@@ -233,7 +249,8 @@
       // HTTPRequestにより蔵書情報取得
       getLib: function () {
         let request = new XMLHttpRequest();
-        let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' + amazon.info.isbn;
+        let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' +
+                   amazon.info.isbn;
         // 一度allow-any-originを噛ませることでクロスドメイン制限対策
         request.open('GET','http://allow-any-origin.appspot.com/' + link,true);
         request.send(); 
