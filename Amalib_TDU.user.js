@@ -46,7 +46,8 @@
         _btAsinTitle: '',
         _res: null,
         setIsbn: function () {
-          document.body.parentNode.innerHTML.match(/name=\"ASIN\" value=\"([0-9A-Z]{10})([\/\-_a-zA-Z0-9]*)/i);
+          document.body.parentNode.innerHTML
+          .match(/name=\"ASIN\" value=\"([0-9A-Z]{10})([\/\-_a-zA-Z0-9]*)/i);
           this._isbn = RegExp.$1;
         },
         get isbn() {
@@ -154,14 +155,14 @@
         link: function() {
           let div = createElement('div',{id:'tdu_link'});
           let link = createElement('a',{
-              href: 'https://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn=' + 
-              amazon.info.isbn +
-              '&title=' +
-              encodeURIComponent(amazon.info.title) +
-              '&press=' +
-              encodeURIComponent(amazon.info.press) +
-              '&price=' +
-              amazon.info.price,
+              href: 'https://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' + 
+              amazon.info.isbn,
+              // '&title=' +
+              // encodeURIComponent(amazon.info.title) +
+              // '&press=' +
+              // encodeURIComponent(amazon.info.press) +
+              // '&price=' +
+              // amazon.info.price,
               target: '_blank'},
             '図書館検索'
           );
@@ -347,6 +348,7 @@
         }
         return null;
       },
+
       // 自動ログイン
       open: function () {
         let loginbutton = null;
@@ -390,7 +392,8 @@
         let err = document.body.innerHTML.match('OP-2010-E');
         if(err){
           // リダイレクトする
-          let url = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do'+document.location.search;
+          let url = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do' +
+                    document.location.search;
           window.open(url,'_self');
         }else{
           library.input();
@@ -473,7 +476,10 @@
 
     function orderODR() {
       var w;
-      document.svcodrform.action='https://' + location.host + '/webopac/odrexm.do' + location.search;
+      document.svcodrform.action='https://' +
+                                 location.host +
+                                 '/webopac/odrexm.do' +
+                                 location.search;
       document.svcodrform.mode.value='new';
       document.svcodrform.reqType.value='_NEW';
       document.svcodrform.loginType.value='once';
