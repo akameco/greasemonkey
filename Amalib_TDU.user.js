@@ -10,8 +10,12 @@
 // @grant       none
 // ==/UserScript==
 (function () {
-    // エレメント作成用ユーティリティ関数
-    let neoCreate = function(tag,attr,content) {
+
+    /*
+     * ユーティリティ関数
+     */
+    // エレメント作成
+    let createElement = function(tag,attr,content) {
       let dom = document.createElement(tag);
       for (let key in attr) {
         dom.setAttribute(key,attr[key]);
@@ -21,79 +25,121 @@
       }
       return dom;
     };
-
+    // パラメータ登録
     let setParam = function(name,value) {  
-      let input = neoCreate('input',{
+      let input = createElement('input',{
           "name": name,
           "value": value
       });
       return input;
     };
 
-    // amazon
+    /*
+     * amazon
+     */
     let amazon = {
-      // amazon内ノード情報
       info: {
-        // 書籍情報のテキスト
-        get isbn(){
-          // ASIN=isbn ASINの取得が容易
+        _isbn: '',
+        _title: '',
+        _press: '',
+        _response: '',
+        _btAsinTitle: '',
+        _res: null,
+        setIsbn: function () {
           document.body.parentNode.innerHTML.match(/name=\"ASIN\" value=\"([0-9A-Z]{10})([\/\-_a-zA-Z0-9]*)/i);
-          return RegExp.$1;
+          this._isbn = RegExp.$1;
         },
-        get title(){
-          return document.getElementById('btAsinTitle').firstChild.textContent;
+        get isbn() {
+          return this._isbn;
         },
-        get press(){
+        setTitle: function() {
+          this._title = document.getElementById('btAsinTitle').firstChild.textContent;
+        },
+        get title() {
+          return this._title;
+        },
+        setPress: function() {
           document.body.innerHTML.match(/出版社:<\/b> (.+?)\(/);
-          return RegExp.$1;
+          this._press = RegExp.$1;
         },
-        get price(){
-          let text = document.querySelectorAll("#actualPriceValue .priceLarge")[0].textContent;
-          return text.replace(/￥ /,"").replace("\n","").replace(",","");
+        get press() {
+          return this._press;
         },
-        res: null
+        setPrice: function() {
+          let text = document.querySelectorAll('#actualPriceValue .priceLarge')[0].textContent;
+          this._price = text.replace(/￥ /,"").replace("\n","").replace(",","");
+        },
+        get price() {
+          return this._price; 
+        },
+        setBtAsinTitle: function() {
+          this._btAsinTitle = document.getElementById('btAsinTitle').parentNode;
+
+        },
+        get btAsinTitle() {
+          return this._btAsinTitle;
+        },
+        setRes: function(response) {
+          // 一度ノードに変換しないとdom操作ができない
+          let html = document.createElement('div');
+          html.innerHTML = response;
+          this._res = html;
+        },
+        get res() {
+          return this._res;
+        }
       },
 
-      // タイトルのノード特定
-      get btAsinTitle(){
-        return document.getElementById('btAsinTitle').parentNode;
+      /*
+       * 初期化
+       */
+      init: function() {
+        amazon.info.setIsbn();
+        amazon.info.setTitle();
+        amazon.info.setPress();
+        amazon.info.setPrice();
+        amazon.info.setBtAsinTitle();
       },
 
       // 図書館情報
       library: {
         // 自大学の場所だけカラーリングを設定
-        setPlace: function(){
-          //localStorage.removeItem('place');
+        setPlace: function() {
+          localStorage.removeItem('place');
           let places = ['千住','千葉','鳩山'];
           if(localStorage.getItem('place') == null){
-            let div = neoCreate('div',{id:'selectLib'});
+            let div = createElement('div',{id:'selectLib'});
             // TODO: 文章の作成
-            let text = neoCreate('div',{id: 'readme'},"\
-              インストール感謝なのです。\n\
-              図書館を便利に\
-              ここに文章をいれよう！\
-              ここに文章をいれよう！\
-              ここに文章をいれよう！\
-              ");
+            let text = createElement('div',{id: 'readme'},
+              'インストール感謝なのです。' + 
+              'このプラグインはアマゾンと図書館を連携し便利に\n' +
+              'ここに文章をいれよう！\n' +
+              'まず自分が通っている大学の場所を設定してね\n' +
+              '何か不具合が合ったら赤芽まで\n'
+              );
             for (let i=0; i < places.length; ++i) {
-              let element = neoCreate('a',{href:'javascript:void(0)'},places[i]);
+              let element = createElement('a',{href:'javascript:void(0)'},places[i]);
               element.addEventListener('click',function (event) {
                   localStorage.setItem('place',event.target.text);
                   // 現在表示されているものを削除
-                  let p = document.querySelector(".parseasinTitle").children;
+                  let p = document.querySelector('.parseasinTitle').children;
                   let len = p.length;
                   for (let j=1; j < len; ++j){
-                    amazon.btAsinTitle.removeChild(p[1]);
+                    amazon.info.btAsinTitle.removeChild(p[1]);
                   }
                   // 再描写
                   amazon.disp.link();
-                  amazon.info.res.querySelector('.flst_head') != null ?
-                  amazon.disp.libLink() : amazon.disp.orderLink();
+                  let e = amazon.info.res.querySelector('.flst_head');
+                  if(e != null){
+                    amazon.disp.libLink();
+                  }else{
+                    amazon.disp.orderLink();
+                  }
               },false);
               div.appendChild(element);
             }
-            amazon.btAsinTitle.appendChild(text);
-            amazon.btAsinTitle.appendChild(div);
+            amazon.info.btAsinTitle.appendChild(text);
+            amazon.info.btAsinTitle.appendChild(div);
           }
         },
         // 図書館の場所
@@ -106,23 +152,20 @@
       disp: {
         // 図書館へのリンク
         link: function() {
-          let div = neoCreate('div',{id:'tdu_link'});
-          let link = neoCreate('a',
-            {
-
-              href: "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn + "&title=" + encodeURIComponent(amazon.info.title) + "&press=" + encodeURIComponent(amazon.info.press) + "&price=" + amazon.info.price,
-              target: '_blank'
-            },
-            "図書館検索"
+          let div = createElement('div',{id:'tdu_link'});
+          let link = createElement('a',{
+              href: 'https://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn=' + amazon.info.isbn + '&title=' + encodeURIComponent(amazon.info.title) + '&press=' + encodeURIComponent(amazon.info.press) + '&price=' + amazon.info.price,
+              target: '_blank'},
+            '図書館検索'
           );
           div.appendChild(link);
-          amazon.btAsinTitle.appendChild(div);
+          amazon.info.btAsinTitle.appendChild(div);
         },
 
         // ロード状態の表示
         loading: function() {
-          div = neoCreate('div',{id:'loading'},"NOW LOADING...");
-          amazon.btAsinTitle.appendChild(div);
+          let div = createElement('div',{id:'loading'},'NOW LOADING...');
+          amazon.info.btAsinTitle.appendChild(div);
         },
 
         // ロード表示の削除 
@@ -134,42 +177,41 @@
         // 購入依頼のリンク作成
         orderLink: function() {
           // let link = "javascript:void(0)";
-          let link = "https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=" + amazon.info.isbn + "&title=" + encodeURIComponent(amazon.info.title) + "&press=" + encodeURIComponent(amazon.info.press) + "&price=" + amazon.info.price;
-          let a = neoCreate('a',{href: link,id: 'order'},"購入依頼");
-          amazon.btAsinTitle.appendChild(a);
+          let link = 'https://lib.mrcl.dendai.ac.jp/webopac/odridf.do?isbn=' + amazon.info.isbn + '&title=' + encodeURIComponent(amazon.info.title) + '&press=' + encodeURIComponent(amazon.info.press) + '&price=' + amazon.info.price;
+          let a = createElement('a',{href: link,id: 'order'},'購入依頼');
+          amazon.info.btAsinTitle.appendChild(a);
         },
 
         // 各図書館の蔵書状況の表示
         libLink: function() {
-          let html = amazon.info.res ? amazon.info.res : null;
-          let div = neoCreate('div',{id:'tduBooks'});
+          let div = createElement('div',{id:'tduBooks'});
           // 要素の調査
-          let tbody = html.querySelectorAll('.flst_head')[0].parentNode;
-          for (let i=1; i < tbody.children.length; ++i) {
-            let element = neoCreate('div');
+          let tbody = amazon.info.res.querySelectorAll('.flst_head')[0].parentNode;
+          for (let i=1,len = tbody.children.length; i < len; ++i) {
+            let element = createElement('div');
             let tr = tbody.children[i];
             // 所蔵館・状態・返却期限日(配架済 or 貸出中)
             let library = {
               place: tr.children[3].firstChild.firstChild.nodeValue,
               state: tr.children[8].firstChild.firstChild.nodeValue,
               priod: tr.children[9].firstChild.firstChild.nodeValue
+            };
+            if(library.place == amazon.library.home){
+              element.setAttribute('id','myhome'); 
             }
-            if(library.place == amazon.library.home)
-              element.setAttribute('id','myhome');
             if(library.state == '貸出中'){
-              element.innerHTML = library.place + " " + library.state + " " + "返却期限 " + library.priod;
+              element.innerHTML = library.place + ' ' + library.state + ' ' + '返却期限 ' + library.priod;
             }else{
-              element.innerHTML = library.place + " " + library.state;
+              element.innerHTML = library.place + ' ' + library.state;
             }
             div.appendChild(element);
           }
-          amazon.btAsinTitle.appendChild(div);
+          amazon.info.btAsinTitle.appendChild(div);
         }
       },
 
       // 関数定義
-      // カテゴリ確認(urlで判断した方がかっこよさげ)
-      category: function() {
+      checkCategory: function() {
         let category = document.querySelector('.nav-category-button').firstChild.innerHTML;
         if(category == '本'){
           return true;
@@ -178,16 +220,17 @@
       },
 
       // 蔵書のページ確認
-      page: function (res) {
-        // 一度ノードに変換しないとdom操作ができない
-        let html = document.createElement('div');
-        html.innerHTML = res;
-        let element = html.querySelector('.flst_head');
-        amazon.info.res = html;
-        element != null ? amazon.disp.libLink() : amazon.disp.orderLink();
+      page: function (response) {
+        amazon.info.setRes(response);
+        let element = amazon.info.res.querySelector('.flst_head');
+        if (element != null) {
+          amazon.disp.libLink();
+        }else{
+          amazon.disp.orderLink();
+        }  
       },
 
-      // 非同期通信により蔵書情報取得
+      // HTTPRequestにより蔵書情報取得
       getLib: function () {
         let request = new XMLHttpRequest();
         let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' + amazon.info.isbn;
@@ -255,9 +298,9 @@
         head.appendChild(element);
       },
 
-      open: function () {
+      open: function() {
         // カテゴリのチェック
-        if(!amazon.category()){
+        if(!amazon.checkCategory()){
           return;
         }
         if(amazon.info.isbn){
@@ -267,15 +310,18 @@
           amazon.style();
         }
       }
-    } 
+    }; 
 
-    // 図書館用
+    /*
+     *  電機大学図書館
+     */
     let library = {
+
       // URLをオブジェクトにして返却
-      get parames(){
+      get parames() {
         if(1 < document.location.search.length){
           let parameters = document.location.search.substring(1).split('&');
-          var result = new Object();
+          let result = {};
           for (let i=0; i < parameters.length; ++i) {
             let element = parameters[i].split('=');
             result[decodeURIComponent(element[0])] = decodeURIComponent(element[1]);
@@ -289,15 +335,15 @@
         let loginbutton = null;
         let pass=false;
         let form = document.forms[0];
-        form.setAttribute("autocomplete","on");
-        for (let j=0; formelement=form.getElementsByTagName("input")[j]; ++j){
-          if(formelement.type == "password" && formelement.value){
+        form.setAttribute('autocomplete','on');
+        for (let j=0; formelement=form.getElementsByTagName('input')[j]; ++j){
+          if(formelement.type == 'password' && formelement.value){
             pass = true; 
             break;
           }
         }
-        for (let j=0; formelement=form.getElementsByTagName("input")[j]; ++j){
-          if (formelement.type == "image" && pass) {
+        for (let j=0; formelement=form.getElementsByTagName('input')[j]; ++j){
+          if (formelement.type == 'image' && pass) {
             loginbutton = formelement;
             break;
           }
@@ -308,89 +354,77 @@
         }
       },
 
-      // setForm
+      // formのactionにパラメータ追加
       setForm: function() {
         let form = document.forms[0];
         form.action = '/webopac/odridf.do' + location.search;
         library.open();
       },
 
-      get path() {
-        return window.location.pathname;
-      },
-
-
-      // ログインページを開く
-      openLoginPage: function() {
-        // let url =  "http://lib.mrcl.dendai.ac.jp/webopac/odrexm.do"+document.location.search;
-        //        window.open(url,'_self');
-        orderODR();
-      },
-
       checkHasBook: function() {
-        let e = document.body.innerHTML.match('指定された条件に該当する資料がありませんでした');
-        if (e) {
-          library.openLoginPage();
+        let err = document.body.innerHTML.match('指定された条件に該当する資料がありませんでした');
+        if (err) {
+          orderODR();
         }
       },  
 
       // システムメッセージが表示されたか確認
       checkErr: function() {
-        let e = document.body.innerHTML.match('OP-2010-E');
-        if (e) {
+        let err = document.body.innerHTML.match('OP-2010-E');
+        if(err){
           // リダイレクトする
-          let url = "http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do"+document.location.search;
+          let url = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do'+document.location.search;
           window.open(url,'_self');
         }else{
           library.input();
         }
       },
 
-
-      // ログインページにurlを改変して移行
-      chengeHome: function() {
-        //library.openLoginPage();
-        library.checkHasBook()
-      },
-
       // フォームに自動入力
       input: function () {
         let tds = document.querySelectorAll('table.opt_frame tbody tr td input');
         let values = {
-          "bibtr": library.parames['title'],
-          "bibpb": library.parames['press'],
-          "isbn": library.parames['isbn'],
-          "bibpr": library.parames['price']
+          'bibtr': library.parames['title'],
+          'bibpb': library.parames['press'],
+          'isbn' : library.parames['isbn'],
+          'bibpr': library.parames['price']
         };
         for (let i=0; i < tds.length; ++i) {
           let td = tds[i].getAttribute('name');
-          for(let name in values)
-            if(td == name)
-            tds[i].value = values[name];
+          for(let name in values){
+            if(td == name){
+              tds[i].value = values[name];
+            }
+          }
         }
       },
+
       // isbnのみか他のパラメータがあるかチェック
       checkParam: function() {
         let parameters = document.location.search.substring(1).split('&');
-        if(parameters.length < 4)
+        if(parameters.length < 4){
           return false;
+        }
         return true;
       },
 
-      // pathごとにメソッドの起動を変える
-      init: {
-        "/webopac/ctlsrh.do": function () {
-          if(library.checkParam())
-            library.chengeHome();
+      start: {
+        '/webopac/ctlsrh.do': function () {
+          if(library.checkParam()){
+            library.checkHasBook();
+          }
         },
-        "/webopac/odridf.do": function () {
+        '/webopac/odridf.do': function () {
           library.checkErr();
         },
-        "/webopac/odrexm.do": function () {
-          if(library.checkParam())
+        '/webopac/odrexm.do': function () {
+          if(library.checkParam()) { 
             library.setForm();
+          }else{
+            library.open();
+          }
         },
-        "/webopac/rsvexm.do":function () {
+        '/webopac/rsvexm.do':function () {
           library.open();
         }
       }
@@ -398,43 +432,36 @@
 
     // urlを確認
     let checkHost = {
-      "www.amazon.co.jp": function () {
+      'www.amazon.co.jp': function () {
+        amazon.init();
         amazon.open();
       },
-      "lib.mrcl.dendai.ac.jp": function () {
-        library.init[library.path]();
+      'lib.mrcl.dendai.ac.jp': function () {
+        let path = window.location.pathname;
+        library.start[path]();
       }       
-    }
+    };
 
     window.onload = function () {
       let host = document.location.host;
       try{
         let f = checkHost[host];
-        if(f == undefined)
-          return;
+        if(f == undefined) return;
         f();
       }catch(err){
         console.log(err);
       } 
       return;
-    }
+    };
 
     function orderODR() {
       var w;
       document.svcodrform.action='https://' + location.host + '/webopac/odrexm.do' + location.search;
-      document.svcodrform.target='Service'+ '1391259716985';
-      // document.svcodrform.mode.value='new';
-      // document.svcodrform.reqType.value='_NEW';
-      // // document.svcodrform.bibbr.value='';
-      // document.svcodrform.bibid.value='';
-      // document.svcodrform.dbTarget.value='LOCAL';
-      // document.svcodrform.volsflg.value='false';
-      // document.svcodrform.isbn.value='';
-      // document.svcodrform.issn.value='';
-      // document.svcodrform.loginType.value='once';
-      w = window.open("", document.svcodrform.target, "toolbar=no, directories=no, menubar=no, status=no, resizable=yes, scrollbars=yes");
+      document.svcodrform.mode.value='new';
+      document.svcodrform.reqType.value='_NEW';
+      document.svcodrform.loginType.value='once';
+      w = window.open('','_self');
       document.svcodrform.submit();
-      document.svcodrform.target='';
       w.focus();
     }
 })();  
