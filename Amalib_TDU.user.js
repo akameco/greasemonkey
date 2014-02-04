@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name        Amalib_TDU
 // @namespace   https://twitter.com/akameco
-// @description 図書館乞食捗るよ！
+// @description more use library
 // @author      akameco
 // @include     http://www.amazon.co.jp/*
 // @include     http://lib.mrcl.dendai.ac.jp/*
 // @include     https://lib.mrcl.dendai.ac.jp/*
 // @version     1.00
-// @grant       none
+// @grant       GM_xmlhttpRequest
 // ==/UserScript==
 (function () {
 
@@ -175,7 +175,7 @@
                      encodeURIComponent(Amazon.info.press) +
                      '&price=' +
                      Amazon.info.price;
-          let a = createElement('a',{href: link,id: 'order'},'購入依頼');
+          let a = createElement('a',{href: link,target:'_blank',id: 'order'},'購入依頼');
           Amazon.info.btAsinTitle.appendChild(a);
         },
 
@@ -230,19 +230,36 @@
         }  
       },
 
+      // request: function () {
+      // let request = new XMLHttpRequest();
+      // let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' +
+      // Amazon.info.isbn;
+      // // 一度allow-any-originを噛ませることでクロスドメイン制限対策
+      // request.open('GET','http://allow-any-origin.appspot.com/' + link,true);
+      // request.send(); 
+      // request.onload = function () {
+      // Amazon.disp.removeLoading();
+      // Amazon.library.setPlace();
+      // Amazon.checkPage(request.responseText);
+      // }
+      // },
+
       // HTTPRequestにより蔵書情報取得
       request: function () {
-        let request = new XMLHttpRequest();
+        console.log(GM_info);
         let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' +
                    Amazon.info.isbn;
-        // 一度allow-any-originを噛ませることでクロスドメイン制限対策
-        request.open('GET','http://allow-any-origin.appspot.com/' + link,true);
-        request.send(); 
-        request.onload = function () {
-          Amazon.disp.removeLoading();
-          Amazon.library.setPlace();
-          Amazon.checkPage(request.responseText);
-        }
+        console.log(link);
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: link,
+            onload: function(xhr) {
+              console.log(xhr);
+              Amazon.disp.removeLoading();
+              Amazon.library.setPlace();
+              Amazon.checkPage(xhr.responseText);
+            }
+        });
       },
 
       // css定義
@@ -364,15 +381,15 @@
           loginbutton.click();
         }
       },
- 
+
       checkHasBook: function() {
         let err = document.body.innerHTML.match('指定された条件に該当する資料がありません');
         if (err) {
           Library.openOrderPage();
         }
       },  
- 
-     openOrderPage: function() {
+
+      openOrderPage: function() {
         let w;
         document.svcodrform.action='https://' +
                                    window.location.host +
@@ -385,7 +402,7 @@
         document.svcodrform.submit();
         w.focus();
       },
- 
+
       // formのactionにパラメータ追加
       setForm: function() {
         let form = document.forms[0];
