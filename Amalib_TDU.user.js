@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        Amalib_TDU
 // @namespace   https://twitter.com/akameco
-// @description more use library
+// @description 東京電機大学の図書館とAmazonの検索をリンク
 // @author      akameco
 // @include     http://www.amazon.co.jp/*
 // @include     http://lib.mrcl.dendai.ac.jp/*
@@ -230,31 +230,14 @@
         }  
       },
 
-      // request: function () {
-      // let request = new XMLHttpRequest();
-      // let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' +
-      // Amazon.info.isbn;
-      // // 一度allow-any-originを噛ませることでクロスドメイン制限対策
-      // request.open('GET','http://allow-any-origin.appspot.com/' + link,true);
-      // request.send(); 
-      // request.onload = function () {
-      // Amazon.disp.removeLoading();
-      // Amazon.library.setPlace();
-      // Amazon.checkPage(request.responseText);
-      // }
-      // },
-
       // HTTPRequestにより蔵書情報取得
       request: function () {
-        console.log(GM_info);
         let link = 'http://lib.mrcl.dendai.ac.jp/webopac/ctlsrh.do?isbn_issn=' +
                    Amazon.info.isbn;
-        console.log(link);
         GM_xmlhttpRequest({
             method: 'GET',
             url: link,
             onload: function(xhr) {
-              console.log(xhr);
               Amazon.disp.removeLoading();
               Amazon.library.setPlace();
               Amazon.checkPage(xhr.responseText);
