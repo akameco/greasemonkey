@@ -11,7 +11,7 @@
     let createElement = function(tag,attr,content){
       let dom = document.createElement(tag);
       for (let key in attr) {
-        dom.setAttribute(key);
+        dom.setAttribute(key,attr[key]);
       }
       if(content){
         dom.textContent = content;
@@ -32,7 +32,6 @@
       // ボタンが押された時のアニメーション
       animetion: function () {
       }
-
     };
     try{
       window.onload = function() {
