@@ -41,6 +41,12 @@
           removeElement(tbody[i]);
         }
       },
+      removeOne: function() {
+        
+      },
+      removeTwo: function() {
+        
+      },
       removeSta: function() {
         let tbody = Unipa.tbody;
         for (let i=0,ren=tbody.length; i < ren; ++i) {
@@ -56,6 +62,11 @@
           let tr = tbody[i];
           for (let j=1,renj=tr.children.length; j < renj ; ++j) {
             let td = tr.children[j];
+            let mark = null;
+            mark = td.querySelectorAll('.linkMark');
+            if (mark[1]) {
+              console.log(mark);
+            }
             let a = td.querySelector('a');
             if (a) {
               a.innerHTML.match(/;(.+?)&.+?【(.+?)】.*;(.+?)&.*;(.+?).0単位/);
