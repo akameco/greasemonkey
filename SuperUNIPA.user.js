@@ -42,11 +42,12 @@
         }
       },
       removeOne: function() {
-        
+
       },
       removeTwo: function() {
-        
+
       },
+
       removeSta: function() {
         let tbody = Unipa.tbody;
         for (let i=0,ren=tbody.length; i < ren; ++i) {
@@ -56,35 +57,44 @@
         let date = document.querySelector('.linknormal thead tr');
         removeElement(date.children[6]);
       },
+
+      // .linkMarkがあるか確認
+      checkTd: function(td) {
+        let marks = td.querySelectorAll('.linkMark');
+        return marks.length;
+      },
+
+      setColum: function(a,i,j) {
+        a.innerHTML.match(/;(.+?)&.+?【(.+?)】.*;(.+?)&/);
+        let obj = {
+          day: day[j],
+          priod: i+1+'限',
+          sub: RegExp.$1,
+          name: RegExp.$2,
+          place: RegExp.$3
+        };
+        if (a.innerHTML.match(/.*;(.+?).0単位/)){
+          obj.credit = RegExp.$1 + '単位';
+        }
+        for (let key in obj) {
+          console.log(obj[key]);
+        }
+        a.innerHTML = obj.sub + ' ' +
+                      obj.name + ' ' + 
+                      obj.place + ' '+
+                      (obj.credit ? obj.credit : '') ;
+      },
+
       getTimeTable: function() {
         let tbody = Unipa.tbody;
-        for (let i=0,ren=tbody.length; i < ren; ++i) {
+        for (let i=0,tbodyRen=tbody.length; i < tbodyRen; ++i) {
           let tr = tbody[i];
-          for (let j=1,renj=tr.children.length; j < renj ; ++j) {
+          for (let j=1,trRen=tr.children.length; j < trRen ; ++j) {
             let td = tr.children[j];
-            let mark = null;
-            mark = td.querySelectorAll('.linkMark');
-            if (mark[1]) {
-              console.log(mark);
-            }
-            let a = td.querySelector('a');
-            if (a) {
-              a.innerHTML.match(/;(.+?)&.+?【(.+?)】.*;(.+?)&.*;(.+?).0単位/);
-              let obj = {
-                day: day[j],
-                priod: i+1+'限',
-                sub: RegExp.$1,
-                name: RegExp.$2,
-                place: RegExp.$3,
-                credit: RegExp.$4 + '単位'
-              };
-              for (let key in obj) {
-                console.log(obj[key]);
-              }
-              a.innerHTML = obj.sub + ' ' +
-                            obj.name + ' ' + 
-                            obj.place + ' '+
-                            obj.credit;
+            let ren = Unipa.checkTd(td);
+            let a = td.querySelectorAll('a');
+            for (let x=0; x < ren; ++x) {
+              if (a[x]) { Unipa.setColum(a[x],i,j); } 
             }
           }
         }
