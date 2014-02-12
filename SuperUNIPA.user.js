@@ -3,9 +3,10 @@
 // @namespace   https://twitter.com/akameco
 // @description あのうにぱを少しマシに
 // @include     https://portal.sa.dendai.ac.jp/up/faces/up/po/Poa00601A.jsp
-// @include     https://portal.sa.dendai.ac.jp/up/faces/up/km/Kma00401A.jsp
-// @include     https://portal.sa.dendai.ac.jp/up/faces/up/co/Coa00201A.jsp
+// @include     https://portal.sa.dendai.ac.jp/up/faces/up/co/*
 // @include     https://portal.sa.dendai.ac.jp/up/faces/up/sp/Spc00101A.jsp
+// @include     https://portal.sa.dendai.ac.jp/up/faces/up/km/*
+// @include     https://portal.sa.dendai.ac.jp/up/faces/up/jg/*
 // @version     1
 // @grant       none
 // ==/UserScript==
@@ -16,6 +17,18 @@
     let removeElement = function(dom) {
       dom.parentNode.removeChild(dom);
     };
+
+    let createElement = function(tag,attr,content) {
+      let dom = document.createElement(tag);
+      for (let key in attr) {
+        dom.setAttribute(key,attr[key]);
+      }
+      if(content){
+        dom.textContent = content;
+      }
+      return dom;
+    };
+
     // 曜日
     let day = {
       1: '月',
@@ -41,12 +54,6 @@
           removeElement(tbody[i]);
         }
       },
-      removeOne: function() {
-
-      },
-      removeTwo: function() {
-
-      },
 
       removeSta: function() {
         let tbody = Unipa.tbody;
@@ -70,7 +77,7 @@
           day: day[j],
           priod: i+1+'限',
           sub: RegExp.$1,
-          name: RegExp.$2,
+          name: RegExp.$2.replace(' ',''),
           place: RegExp.$3
         };
         if (a.innerHTML.match(/.*;(.+?).0単位/)){
@@ -79,10 +86,39 @@
         for (let key in obj) {
           console.log(obj[key]);
         }
-        a.innerHTML = obj.sub + ' ' +
-                      obj.name + ' ' + 
-                      obj.place + ' '+
-                      (obj.credit ? obj.credit : '') ;
+        // a.innerHTML = obj.sub + ' ' +
+        // obj.place + ' '+
+        // obj.name + ' ' + 
+        // (obj.credit ? obj.credit : '') ;
+        a.innerHTML = obj.sub;
+      },
+
+      replaceVoid: function() {
+        let as = document.getElementsByTagName('a');
+        // console.log(as);
+        for (let i=0; i < as.length; ++i) {
+          // console.log(as[i]);
+          if (as[i].getAttribute('href') == '#') {
+            as[i].setAttribute('href','javascript:void(0)');
+          }
+        }
+      },
+
+      css: function() {
+        let style="\
+        td a{\
+          font-size:16px;\
+          display:block;\
+          width:100%;\
+          height:100%;\
+        }\
+        a:hover {\
+          background-color:#ffcccc;\
+        }\
+        ";
+        let head = document.getElementsByTagName('head')[0];
+        let element = createElement('style',{type:'text/css'},style);
+        head.appendChild(element);
       },
 
       getTimeTable: function() {
@@ -99,22 +135,19 @@
           }
         }
       },
-      // デバック用
-      check: function() {
-        let tbody = Unipa.tbody;
-        console.log(tbody);
-      },
       init: function() {
         Unipa.setTbody();
+        Unipa.css();
       }
     };
     window.onload = function () {
       Unipa.init();
-      Unipa.check();
+      // Unipa.check();
       Unipa.removeExtraTime();
       Unipa.removeSta();
       Unipa.setTbody();
-      Unipa.check();
+      // Unipa.check();
       Unipa.getTimeTable();
+      Unipa.replaceVoid();
     };
-})(); 
+})();   
