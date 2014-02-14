@@ -9,8 +9,8 @@
 // ==/UserScript==
 (function($) {
     let google = {
-      isYear: function() {
-        return document.URL.match(/tbs=qdr:y/) ? true : false;
+      isYear: function(url) {
+        return url.match(/tbs=qdr:y/) ? true : false;
       },
       link: function(url, text) {
         $('#appbar').after('<div id="gmyear"><a href=' + url + '>' + text + '</a></div>');
@@ -21,17 +21,20 @@
             'margin': '10px 6px 0 135px'})
         .hover(
           function() {
-            $(this).css('color','#222222')
+            $(this).css('color','#222222');
           },
           function() {
-            $(this).css('color','#777777')
+            $(this).css('color','#777777');
           }
-        );
+        )
+        .click(function() {
+            $(this).css('color','red');
+        });
       }
     };
     $(document).ready(function() {
-        let url = document.URL;
-        if (google.isYear()) {
+        let url = decodeURIComponent(document.URL);
+        if (google.isYear(url)) {
           google.link(url.replace(/&tbs=qdr:y/,'&tbs=0'),'期間指定なし');
         } else {
           url = url.match(/&tbs=0/) ? url.replace(/&tbs=0/,'&tbs=qdr:y') : url + '&tbs=qdr:y';
