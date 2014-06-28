@@ -87,9 +87,21 @@
     var matchHost = {
       // しぃアンテナ(*ﾟーﾟ)
       // http://2ch-c.net/*
+      //"2ch-c.net": function () {
+      //let target = document.getElementById('pickup').getAttribute('href');
+      //wopen(target);
+      //},
+
+      // しぃアンテナ(*ﾟーﾟ)
+      // http://2ch-c.net/*
       "2ch-c.net": function () {
-        let target = document.getElementById('pickup').getAttribute('href');
-        wopen(target);
+        let targets = document.getElementsByTagName("a");
+        for (let i=0; i < targets.length; i++) {
+          if(targets[i].textContent == document.title){
+            let target = targets[i].getAttribute('href');
+            wopen(target);
+          }
+        }
       },
 
       // 2GET
